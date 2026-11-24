@@ -155,6 +155,7 @@ Parley.L = {
   ok = "OK",
   newLines = "%d new",
   moreTabs = "More tabs",
+  fromCharacter = "%s's chat",
   tabName = "Tab name",
 
   -- first run and layouts
@@ -300,9 +301,13 @@ Parley.L = {
     history = "History",
     keep = "Keep private chat for",
     days = "%d days",
-    historyDesc = "Whispers, guild, officer, group and For you survive reloads and logouts for this long. Each character keeps its own.",
+    historyDesc = "Whispers, guild, officer, group and For you survive reloads and logouts for this long.",
     clear = "Clear history",
-    clearDesc = "This character's. Your other characters keep theirs.",
+    clearDesc = "The history that's showing: every character's when it's shared, else only this one's. Asks first.",
+    clearAskAll = "Clear the chat history of every character? It can't be brought back.",
+    clearAskOwn = "Clear this character's chat history? It can't be brought back.",
+    share = "Share history between characters",
+    shareDesc = "Every character shows what was said on the others too. Off: only its own. Each keeps its own history either way, so you can switch back. A character's chat joins the others' once it has logged in.",
     buttons = "Set up",
     pickLayout = "Pick a layout",
     editNames = "Channel names",

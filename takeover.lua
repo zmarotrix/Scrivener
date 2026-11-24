@@ -344,7 +344,9 @@ local function recentWhispers(n)
     if r.kind == "WHISPER" and (P.WHISPER_IN[r.type] or P.WHISPER_OUT[r.type]) then take(r) end
     if #out >= n then return out end
   end
-  local saved = P.char.history.WHISPER or {}
+  local saved = {}
+  P:EachSaved("WHISPER", function(e) saved[#saved + 1] = e end)
+  table.sort(saved, function(a, b) return a[1] < b[1] end)
   for i = #saved, 1, -1 do
     local e = saved[i]
     local r = { type = e[2], who = e[3], kind = "WHISPER" }

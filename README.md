@@ -52,7 +52,9 @@ conversations, your name and alerts are checked, and the lines are kept in histo
 
 ### History and search
 Whispers, guild, officer, group chat and For you survive reloads and logouts (30 days by default); channels, Say, loot
-and system lines for two days. Each character keeps its own history; settings and windows are shared. Search looks through all of it as you type, and Jump shows a result where it was said.
+and system lines for two days. Your characters share one history, each showing
+what was said on the others, unless you turn that off in Settings; then each shows only its own. Every character keeps its
+own either way, so switching loses nothing. Search looks through all of it as you type, and Jump shows a result where it was said.
 
 ### The chat box
 The game's own chat box, moved into Parley's window and restyled. Parley never rewrites it, so `/cast`, `/target` and

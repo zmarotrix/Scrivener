@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.8.1 (2026-11-23)
+
+- **Chat history is shared between your characters**, with a switch in Settings, under History. Shared, every character
+  shows what was said on the others: guild, whispers and their conversations, group chat, channels and For you, in the
+  window, the whisper list and search. Hover a line's bar to see whose chat it was. Loot, money, experience and system
+  lines stay with the character they happened to.
+- Turn it off and each character shows only its own, as in 0.7.6. Every character still keeps its own history, so you can
+  switch back and forth and nothing is moved or lost. A character's chat joins the others' once it has logged in with
+  this version.
+- With a great many characters, the others show their newest 60,000 lines in all. A character's own history isn't cut.
+- Clear history asks first, and says whether it's every character's or only this one's.
+- Parley's mark stays when the headers fade.
+
 ## 0.8.0 (2026-11-23)
 
 - **Parley looks like the rest of the suite.** Windows are rounded panels with a soft shadow and light along the top, in

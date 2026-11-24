@@ -60,7 +60,11 @@ function P.IsChannel(key) return type(key) == "string" and key:sub(1, 1) == "#" 
 function P:SeeChannel(name, num)
   local key, base = P.ChannelKey(name)
   if not key then return nil end
-  if type(num) == "number" and num > 0 then self.chanNum[key] = num end
+  if type(num) == "number" and num > 0 and self.chanNum[key] ~= num then
+    self.chanNum[key] = num
+    -- other characters' lines take this one's numbers and colours, which may only now be known
+    if self.db.shareHistory and self.sessionStart and time() - self.sessionStart < 60 and self.RedrawSoon then self:RedrawSoon() end
+  end
   if self.db then
     self.db.chanNames[key] = base
     self.db.seen[key] = true

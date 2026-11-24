@@ -53,18 +53,13 @@ function P:Find(query, filter)
   end
   if filter == "session" then return found end
   -- then what history kept from before it
-  local start = self.sessionStart or time()
   local older = {}
-  for kind, list in pairs(self.char.history) do
-    if kind ~= "FORYOU" and (not kinds or kinds[kind]) then
-      for _, e in ipairs(list) do
-        if e[1] < start and hit(e[4], e[3], e) then older[#older + 1] = e end
-      end
-    end
-  end
-  table.sort(older, function(a, b) return a[1] > b[1] end)
-  for _, e in ipairs(older) do
-    found[#found + 1] = self.HistoryRecord(e)
+  self:EachSaved(nil, function(e, h)
+    if (not kinds or kinds[e[7]]) and hit(e[4], e[3], e) then older[#older + 1] = { e, h } end
+  end)
+  table.sort(older, function(a, b) return a[1][1] > b[1][1] end)
+  for _, pair in ipairs(older) do
+    found[#found + 1] = self.HistoryRecord(pair[1], pair[2])
     if #found >= MAX_RESULTS then break end
   end
   return found
@@ -208,7 +203,8 @@ local function build(win)
       row.rule:SetHeight(1)
     end,
     updateRow = function(row, r)
-      row.when:SetText(dayLabel(r.t or time()) .. " " .. date("%H:%M", r.t or time()) .. "  \194\183  " .. P.KindLabel(r.kind))
+      row.when:SetText(dayLabel(r.t or time()) .. " " .. date("%H:%M", r.t or time()) .. "  \194\183  " .. P.KindLabel(r.kind)
+        .. (r.from and "  \194\183  " .. r.from or ""))   -- another character's
       local text, marks = marked(r, v.needle or "")
       row.text:SetText(P.LowerIcons(text, 13))   -- 13: the row's own text size
       local room = (row.text:GetWidth() or 0)

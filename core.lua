@@ -21,7 +21,7 @@ Parley = Parley or {}
 local P = Parley
 local L = P.L
 
-P.VERSION = "0.8.0"
+P.VERSION = "0.8.1"
 P.Core = Core
 P.UI = Core.UI
 P.MEDIA = "Interface\\AddOns\\Parley\\media\\"
@@ -39,7 +39,8 @@ function P.Own(widget)
 end
 
 -------------------------------------------------------------------------------------------
--- Saved data: settings and windows are the account's, chat history each character's
+-- Saved data: settings and windows are the account's. Chat history is each character's, with a copy in the account's file
+-- for your other characters to show (history.lua)
 -------------------------------------------------------------------------------------------
 
 P.DEFAULTS = {
@@ -63,6 +64,8 @@ P.DEFAULTS = {
   craftNearby = false,    -- strangers crafting and opening things near you (a flood in cities); yours and your group's always show
   raceIcons = false,      -- the game's race icon beside names (Better Forever Chat's feature, off unless chosen)
   classIcons = false,     -- the game's class icon beside names
+  shareHistory = true,    -- every character shows the others' chat history too (history.lua); off: only its own
+  histories = {},         -- [character's GUID] = { name, history, people, personInfo }: what the others show
   keepAll = true,         -- history keeps public channels, Say, loot and system lines too (two days, 400 of each)
   time = true,
   surnames = "full",      -- "full", "short" (Kuma T.) or "first"

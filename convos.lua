@@ -31,9 +31,9 @@ function P.ConvoKey(r)
 end
 
 ---A saved whisper as a record (a Battle.net one finds its friend again).
-local function fromHistory(e)
+local function fromHistory(e, h)
   local r = { t = e[1], type = e[2], who = e[3], text = e[4], kind = "WHISPER", restored = true, hasWho = true,
-    guid = e[3] and P.char.people[e[3]], id = 0 }
+    guid = e[3] and h.people[e[3]], from = not h.own and h.name or nil, id = 0 }
   P:BNRestore(r)
   return r
 end
@@ -116,18 +116,53 @@ local function note(r)
   return c
 end
 
-local function buildIndex()
+local function buildIndex(switched)
   index = {}
-  for _, e in ipairs(P.char.history.WHISPER or {}) do note(fromHistory(e)) end
+  for _, h in ipairs(P:Histories()) do   -- this session's too: the window holds only so many lines
+    for _, e in ipairs(h.history.WHISPER or {}) do note(fromHistory(e, h)) end
+  end
   for _, r in ipairs(P.records) do
     if r.kind == "WHISPER" then note(r) end
   end
+  if switched then return end
   for key in pairs(P.char.personInfo) do
     if not index[key] then P.char.personInfo[key] = nil end   -- their whispers aged out of history
   end
 end
 
----Whether this character has a conversation with them (the Whispers tab's pick is the account's; the people are not).
+---The history on show changed (shared or not, cleared): the people in it follow, with their unread counts, and a pane on
+---someone who's no longer in it goes to the last person who is.
+function P:ConvosChanged()
+  local old = index
+  if not old then return end
+  buildIndex(true)
+  for key, c in pairs(index) do if old[key] then c.unread = old[key].unread end end
+  for pane, tf in pairs(self.tabFrames) do
+    if tf.rail then
+      if not (pane.person and index[pane.person]) then
+        local list = self:ConvoList()
+        pane.person = list[1] and list[1].key or nil
+        local c = pane.person and index[pane.person]
+        if c and tf.frame:IsVisible() then   -- looked at now: the new lines are marked, and no longer count as unread
+          tf.newSince, c.unread = c.unread, 0
+        end
+      end
+      self:RefreshRail(pane, tf)
+    end
+  end
+  if self.replyTo and not index[self.replyTo.key] then self.replyTo = nil end
+end
+
+---What Parley has seen of someone: this character, this session, then the other histories on show.
+local function seenOf(key)
+  local e = P.char.personInfo[key] or sighted[key]
+  if e or not P.db.shareHistory then return e end
+  for _, h in ipairs(P:Histories()) do
+    if not h.own and h.personInfo[key] then return h.personInfo[key] end
+  end
+end
+
+---Whether the history on show has a conversation with them (the Whispers tab's pick is the account's).
 function P:ConvoKnows(key)
   if not index then buildIndex() end
   return index[key] ~= nil
@@ -165,7 +200,7 @@ end
 function P:PersonInfo(name, guid)
   local info = {}
   local key = name:lower()
-  local seen = P.char.personInfo[key] or sighted[key]
+  local seen = seenOf(key)
   local friends = rawget(_G, "C_FriendList")
   local g = roster[key]
   local f
@@ -436,13 +471,11 @@ function P:ConvoBackfill(pane, tf)
   local key = pane.person
   if not key then return end
   local lines = {}
-  local start = self.sessionStart or time()
-  for _, e in ipairs(self.char.history.WHISPER or {}) do
-    if e[1] < start and e[3] then
-      local r = fromHistory(e)
-      if P.ConvoKey(r) == key then lines[#lines + 1] = r end
-    end
-  end
+  self:EachSaved("WHISPER", function(e, h)
+    if not e[3] then return end
+    local r = fromHistory(e, h)
+    if P.ConvoKey(r) == key then lines[#lines + 1] = r end
+  end)
   for _, r in ipairs(self.records) do
     if P.ConvoKey(r) == key then lines[#lines + 1] = r end
   end

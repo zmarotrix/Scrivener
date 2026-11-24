@@ -67,10 +67,10 @@ function P.Explained(what, texture)
 end
 
 ---The chat's bar, the first thing on every line (3 px wide, a little shorter than the text, centred on it); hovering it
----names the chat.
-local function bar(r, g, b, h, kind)
+---names the chat, and whose it is when it's another character's.
+local function bar(r, g, b, h, kind, from)
   local tex = ("|T%s:%d:3:0:%d:8:32:0:8:0:32:%d:%d:%d|t"):format(BAR, h - 2, P.IconDrop(), n255(r), n255(g), n255(b))
-  if kind then tex = P.Explained("kind:" .. kind, tex) end
+  if kind then tex = P.Explained("kind:" .. kind .. (from and "@@" .. from or ""), tex) end
   return tex .. GAP
 end
 
@@ -175,10 +175,18 @@ local GROUP_OF = { PARTY_LEADER = "PARTY", PARTY_GUIDE = "PARTY", RAID_LEADER = 
   INSTANCE_CHAT_LEADER = "INSTANCE_CHAT", WHISPER_INFORM = "WHISPER", GUILD_DISCORD = "GUILD" }
 local function chatGroup(t) return GROUP_OF[t] or t end
 
+---A channel line's number. Numbers are each character's own, and change: a line from history has this character's now.
+local function chanNum(r)
+  if not (r.restored and r.chan) then return r.num end
+  return P.chanNum[r.kind] or (not r.from and r.num) or nil
+end
+P.LineChanNum = chanNum
+
 local function playerLink(r)
   if r.bn then return P.BNLink(r) end   -- a Battle.net friend: their token, in Battle.net blue
   local group = chatGroup(r.type)
-  local target = r.num and tostring(r.num) or ""
+  local num = chanNum(r)
+  local target = num and tostring(num) or ""
   if r.held then
     -- `..` only: the name stays hidden inside the link and the game shows it
     return "|Hplayer:" .. r.who .. ":" .. (r.lineID or 0) .. ":" .. group .. ":" .. target .. "|h" .. r.who .. "|h"
@@ -259,13 +267,14 @@ local NO_TAG = { SYSTEM = true, LOOT = true, MONEY = true, XP = true, CRAFT = tr
 local function tag(r, tab)
   if not P.Mixed(tab) or P.db.showAs == "bar" or NO_TAG[r.kind] then return "" end
   local text
-  if P.db.showAs == "number" and r.num then text = tostring(r.num)
+  local num = chanNum(r)
+  if P.db.showAs == "number" and num then text = tostring(num)
   elseif P.db.showAs == "full" then text = P.KindLabel(r.kind)
   else text = P.Short(r.kind) end
   local cr, cg, cb = P.KindColor(r.kind)
   text = "|c" .. P.Hex(cr, cg, cb) .. text .. "|r"
-  if r.chan and r.num then
-    text = "|Hchannel:channel:" .. r.num .. "|h" .. text .. "|h"
+  if r.chan and num then
+    text = "|Hchannel:channel:" .. num .. "|h" .. text .. "|h"
   elseif LINKED[r.kind] then
     text = "|Hchannel:" .. LINKED[r.kind] .. "|h" .. text .. "|h"
   end
@@ -357,7 +366,7 @@ local function plainBody(r, cont, you)
   local link = playerLink(r)
   local flag = ""
   if r.flag and r.flag ~= "" and ChatFrameUtil and ChatFrameUtil.GetPFlag then
-    local ok, f = pcall(ChatFrameUtil.GetPFlag, r.flag, r.zoneID or 0, r.num or 0)
+    local ok, f = pcall(ChatFrameUtil.GetPFlag, r.flag, r.zoneID or 0, chanNum(r) or 0)
     if ok and f then flag = f end
   end
   flag = flag .. P.PlayerIcons(r.guid)
@@ -402,13 +411,15 @@ function P:Format(r, tab, cont)
   local cr, cg, cb = r.cr, r.cg, r.cb
   if not cr then cr, cg, cb = P.KindColor(r.kind) end
   local lr, lg, lb = cr, cg, cb
-  if r.typeColor then lr, lg, lb = r.typeColor.r, r.typeColor.g, r.typeColor.b end
+  local words = r.typeColor
+  if r.restored and r.chan and ChatTypeInfo then words = ChatTypeInfo["CHANNEL" .. (chanNum(r) or "")] end
+  if words then lr, lg, lb = words.r, words.g, words.b end
   -- the line reads bar, time, then the words (as in the mock-up). A held line reads the same, with no mark of its own
   -- (Maro, 23 Nov); it gets its class colour when it's read again after the fight.
   if r.held then
     local ok, body = pcall(heldBody, r)
     if not ok then return nil end
-    return assemble(bar(cr, cg, cb, h, r.kind), stamp(r.t), tag(r, tab), body), lr, lg, lb
+    return assemble(bar(cr, cg, cb, h, r.kind, r.from), stamp(r.t), tag(r, tab), body), lr, lg, lb
   end
   local body = (self.db.tidy and r.tidy and self.TidyText and self:TidyText(r))
     or plainBody(r, cont, tab and tab.special == "convos")
@@ -427,9 +438,9 @@ function P:Format(r, tab, cont)
   if cont then
     -- the time's room left empty and the words a little in, under the line that named the person (the mock-up's .cont)
     local pad = self.db.time and (self.contPad or "") or ""
-    return assemble(bar(cr, cg, cb, h, r.kind), pad, "   ", body .. tail), lr, lg, lb
+    return assemble(bar(cr, cg, cb, h, r.kind, r.from), pad, "   ", body .. tail), lr, lg, lb
   end
-  return assemble(bar(cr, cg, cb, h, r.kind), stamp(r.t), tag(r, tab), body .. tail), lr, lg, lb
+  return assemble(bar(cr, cg, cb, h, r.kind, r.from), stamp(r.t), tag(r, tab), body .. tail), lr, lg, lb
 end
 
 -- The repeat count as the mock-up's outlined pill: drawn ones for x2 to x19 and 20+ (media/fold-*.tga, 64 x 32 with the

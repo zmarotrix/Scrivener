@@ -565,8 +565,10 @@ function P:LinkTip(owner, link)
   local tip = link:match("^addon:Parley:tip:(.+)$")
   if tip then
     local kind = tip:match("^kind:(.+)$")
-    local text, sub
+    local text, sub, from
     if kind then
+      local k, name = kind:match("^(.-)@@(.+)$")
+      if k then kind, from = k, name end
       text = P.KindLabel(kind)
       if not P.TALK[kind] and not P.IsChannel(kind) then sub = nil elseif P.Short(kind) ~= text then sub = P.Short(kind) end
     else
@@ -576,6 +578,7 @@ function P:LinkTip(owner, link)
     GameTooltip:SetOwner(owner, "ANCHOR_CURSOR_RIGHT", 12, 0)
     GameTooltip:SetText(text, 1, 1, 1, 1, true)
     if sub then GameTooltip:AddLine(sub, .66, .63, .54) end
+    if from then GameTooltip:AddLine(L.fromCharacter:format(from), .66, .63, .54) end
     GameTooltip:Show()
     return
   end
@@ -1140,6 +1143,7 @@ local function createWindow(index)
   win.mark:SetScript("OnLeave", function() GameTooltip:Hide() end)
   win.mark:SetScript("OnDragStart", function() if not P.db.locked then P:BeginMove(win) end end)
   win.mark:SetScript("OnDragStop", function() P:EndMove(win) end)
+  pcall(win.mark.SetIgnoreParentAlpha, win.mark, true)   -- it stays when the headers fade (Maro, 23 Nov)
   win.mark:Hide()
 
   win.menuButton = iconButton(bar, "gear", 14, L.settings, function(self) P:WindowMenu(win, self) end)

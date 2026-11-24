@@ -71,10 +71,11 @@ P:OnReady(function() P.Core:OnLogin(function()
   list:Buttons(S.editAlerts, nil, { { S.editAlerts, function() P:OpenAlerts() end } })
 
   list:Header(S.history)
+  list:Toggle(S.share, S.shareDesc, function() return db.shareHistory end, function(on) P:SetShareHistory(on) end)
   list:Slider(S.keep, S.historyDesc, 1, 90, 1, function() return db.keepDays end,
     function(v) db.keepDays = v end, S.days)
   list:Toggle(S.keepAll, S.keepAllDesc, function() return db.keepAll end, function(on) db.keepAll = on end)
-  list:Buttons(S.clear, S.clearDesc, { { S.clear, function() P:ClearHistory() end } })
+  list:Buttons(S.clear, S.clearDesc, { { S.clear, function() P:AskClearHistory() end } })
 
   page:SetScript("OnShow", function() list:Refresh() end)
   P.settingsPage, P.settingsList = page, list
