@@ -19,23 +19,17 @@ local HIDE = { "GeneralDockManager", "ChatFrameMenuButton", "ChatFrameChannelBut
   "ChatFrameToggleVoiceMuteButton", "QuickJoinToastButton", "TextToSpeechButtonFrame", "ChatAlertFrame",
   "CombatLogQuickButtonFrame_Custom" }
 local ART = { "Left", "Mid", "Right", "FocusLeft", "FocusMid", "FocusRight" }
-local ACCENT = UI.Hex(P.ACCENT_HEX)
 
 -------------------------------------------------------------------------------------------
--- The chat box: the game's own, in a pill at the bottom of the window you last used, with a chip at its left saying
--- where the line will go (the mock-up's .compose and .dest). The game's "Guild:" header is faded out and the chip sits
+-- The chat box: the game's own, in a suite text field at the bottom of the window you last used, with a chip at its
+-- left saying where the line will go (the mock-up's .compose and .dest). The game's "Guild:" header is faded out and the chip sits
 -- in its room; clicking the chip lists where else the line could go.
 -------------------------------------------------------------------------------------------
 
 local home = CreateFrame("Button", "ParleyChatBoxHome", UIParent)
 home:SetHeight(P.COMPOSE_H)
 home:RegisterForClicks("LeftButtonUp")
-home.bg = UI.Round(home, "BACKGROUND", 0, 14)
-home.bg:SetColor({ 0, 0, 0 }, .5)
-home.line = UI.Round(home, "BORDER", 0, 14, "line")
--- quiet: the window's own dark gold line with a hint of Parley's colour, a little brighter while you type
-local QUIET, TYPING = UI.Mix(ACCENT, C.line, .85), UI.Mix(ACCENT, C.line, .6)
-home.line:SetColor(QUIET, .5)
+P.FieldLook(home)   -- recessed; it glows while you type
 local idle = UI.Text(home, "body", 13, C.faint)
 
 -- The chip and the box sit side by side, never one over the other: while you type, the game lifts its box to the
@@ -45,10 +39,9 @@ chip:SetHeight(22)
 chip:EnableMouse(true)
 chip:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 chip:SetPoint("LEFT", home, "LEFT", 4, 0)
-chip.bg = UI.Round(chip, "BACKGROUND", 0, 11)
-chip.bg:SetColor({ 1, 1, 1 }, .06)
-chip.line = UI.Round(chip, "BORDER", 0, 11, "line")
-chip.line:SetColor({ 1, 1, 1 }, .14)
+P.RaisedPill(chip)
+chip:SetScript("OnEnter", function(self) self:Raise(true) end)
+chip:SetScript("OnLeave", function(self) self:Raise(false) end)
 chip.label = UI.Text(chip, "body", 12, C.text)
 chip.label:SetPoint("LEFT", 9, 0)
 chip.arrow = UI.Icon(chip, "chevron", 9, C.muted)   -- drawn: the suite's font has no arrow glyph
@@ -72,8 +65,7 @@ local lang = CreateFrame("Frame", nil, tail)
 lang:SetHeight(22)
 lang:SetPoint("RIGHT", tail, "RIGHT", 0, 0)
 lang:Hide()
-lang.bg = UI.Round(lang, "BACKGROUND", 0, 11)
-lang.line = UI.Round(lang, "BORDER", 0, 11, "line")
+P.RaisedPill(lang)
 lang.label = UI.Text(lang, "body", 12, C.muted)
 lang.label:SetPoint("LEFT", 9, 0)
 lang.arrow = UI.Icon(lang, "chevron", 9, C.muted)
@@ -85,16 +77,9 @@ lang.icon:Hide()
 
 local function paintLanguage()
   local other, hover = lang.other, lang.hover
-  if other then
-    lang.bg:SetColor(ACCENT, hover and .22 or .14)
-    lang.line:SetColor(ACCENT, .45)
-    lang.label:SetTextColor(ACCENT[1], ACCENT[2], ACCENT[3])
-  else
-    lang.bg:SetColor({ 1, 1, 1 }, hover and .12 or .06)
-    lang.line:SetColor({ 1, 1, 1 }, .14)
-    local c = hover and C.text or C.muted
-    lang.label:SetTextColor(c[1], c[2], c[3])
-  end
+  lang:Raise(hover, other)   -- a language that isn't your own stands out
+  local c = (other or hover) and C.text or C.muted
+  lang.label:SetTextColor(c[1], c[2], c[3])
   lang.icon:SetAlpha(hover and 1 or .7)
 end
 
@@ -155,8 +140,10 @@ function P.DestLabel(ctype, target)
 end
 
 local lastDest
-local function updateChip(box)
+local function updateChip(box, typing)
   local ctype, target = destination(box)
+  local picked = not typing and P.PickedPerson and P:PickedPerson(box)   -- where the next line will go, once it's opened
+  if picked then ctype, target = picked.bn and "BN_WHISPER" or "WHISPER", picked.name end
   local key = ctype .. "\0" .. tostring(target)
   if key == lastDest then return end
   lastDest = key
@@ -288,19 +275,25 @@ local wait = 0
 home:SetScript("OnUpdate", function(_, dt)
   local box = P.box
   if not box then return end
-  local shown = box:IsShown()
+  -- In the game's IM chat style (its default) the box stays shown between lines, without focus: shown isn't typing.
+  local shown, typing = box:IsShown(), box:HasFocus() and true or false
   wait = wait - dt
-  if not shown and wait > 0 then return end
+  if not typing and not home.typing and wait > 0 then return end
   wait = .25
-  idle:SetShown(not shown)
-  if shown ~= home.typing then
-    home.typing = shown
-    home.line:SetColor(shown and TYPING or QUIET, shown and .6 or .5)
+  local empty = not shown
+  if shown and not typing then
+    local text = box:GetText()
+    empty = not Hidden(text) and (text or "") == ""
   end
-  updateChip(box)
+  idle:SetShown(not typing and empty)
+  if typing ~= home.typing then
+    home.typing = typing
+    home:Light(typing)
+  end
+  updateChip(box, typing)
   P.UpdateLanguage(box)
 
-  if box:HasFocus() then home:SetAlpha(1) end
+  if typing then home:SetAlpha(1) end
   if shown then
     -- the game widens the box's left inset for its own "Guild:" header, which the chip replaces
     local left = box:GetTextInsets()
@@ -309,7 +302,7 @@ home:SetScript("OnUpdate", function(_, dt)
 end)
 
 home:SetScript("OnClick", function()
-  if P.box and not P.box:IsShown() then ChatFrameUtil.OpenChat("", DEFAULT_CHAT_FRAME) end
+  if P.box and not P.box:HasFocus() then ChatFrameUtil.OpenChat(nil, DEFAULT_CHAT_FRAME) end   -- as Enter: any words stay
 end)
 chip:SetScript("OnMouseDown", function()
   -- keep what's typed: the box may close when the chip takes the click
@@ -429,7 +422,8 @@ local function grab(box)
     if type(region) == "table" and region.SetAlpha then region:SetAlpha(0) end   -- the chip says where it goes
   end
   box:HookScript("OnHide", function() counter:SetText("") end)
-  box:HookScript("OnShow", function(self) if P.ConvoBoxOpened then P:ConvoBoxOpened(self) end end)
+  -- taking focus is how the box opens in either of the game's chat styles (in IM style it's already shown)
+  box:HookScript("OnEditFocusGained", function(self) if P.ConvoBoxOpened then P:ConvoBoxOpened(self) end end)
   -- Ctrl-F while typing opens search on the window the box sits in (the mock-up's search screen)
   box:HookScript("OnKeyDown", function(self, key)
     if key == "F" and IsControlKeyDown() and P.OpenSearch then
@@ -453,6 +447,8 @@ function P:DockBox(win)
   if not win or not self.box then return end
   local old = self.dockWin
   self.dockWin = win
+  if old and old ~= win and old.data and self.windows[old.index] == old then self:UpdateTabs(old) end
+  self:UpdateTabs(win)   -- Parley's mark goes with the chat box
   home:SetParent(win.frame)
   home:ClearAllPoints()
   home:SetPoint("BOTTOMLEFT", win.frame, "BOTTOMLEFT", 8, 8)
@@ -681,10 +677,17 @@ function P:TakeOver()
   for fn, how in pairs({ ChatPageUp = "PageUp", ChatPageDown = "PageDown", ScrollToBottom = "ScrollToBottom" }) do
     if util and type(util[fn]) == "function" then hooksecurefunc(util, fn, function() P:ScrollShown(how) end) end
   end
-  -- the game's calls that open the box on a whisper (the Reply keys, a name's Whisper, a Battle.net friend's): a person
-  -- picked in the whisper list never overrides them
+  -- Calls that say where the box goes (the Reply keys, a name's Whisper, a Battle.net friend's, and OpenChat with words:
+  -- the chip's list, a channel's tag, "Send again", a slash command): a person picked in the whisper list never overrides
+  -- them. A bare slash could still be anything, so it leaves the pick for the next line.
   for _, fn in ipairs({ "ReplyTell", "ReplyTell2", "SendTellWithMessage", "SendBNetTell" }) do
-    if util and type(util[fn]) == "function" then hooksecurefunc(util, fn, function() P.toldAt = GetTime() end) end
+    if util and type(util[fn]) == "function" then hooksecurefunc(util, fn, function() P:DropPick() end) end
+  end
+  if util and type(util.OpenChat) == "function" then
+    hooksecurefunc(util, "OpenChat", function(text)
+      if type(text) ~= "string" or Hidden(text) or text == "" then return end
+      P:DropPick(not text:find("^/%S"))   -- a bare slash, or words of no particular chat (a linked item)
+    end)
   end
   -- a chat's colour changed (Parley's Channel names panel or the game's settings): the lines follow
   Core:On("UPDATE_CHAT_COLOR", "parley.colors", function()

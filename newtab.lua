@@ -9,6 +9,7 @@ local UI = P.UI
 local C = UI.C
 
 local W, PAD, CARD_H, GAP = 474, 14, 58, 8
+local TOP = 52       -- where the cards start, under the title's line
 local CARDS = { "guild", "group", "whispers", "tradeplus", "loot", "system", "foryou", "addons", "combat" }
 local ACCENT = UI.Hex(P.ACCENT_HEX)
 
@@ -17,10 +18,7 @@ local pop
 local function card(parent, key, onClick)
   local b = CreateFrame("Button", nil, parent)
   b:SetSize((W - 2 * PAD - 2 * GAP) / 3, CARD_H)
-  b.bg = UI.Round(b, "BACKGROUND", 0, 6)
-  b.bg:SetColor(C.inset, .75)
-  b.line = UI.Round(b, "BORDER", 0, 6, "line")
-  b.line:SetColor(C.lineStrong, 1)
+  P.Card(b)
   local sample = P.TABS[key]()
   local x = 9
   local keys = {}
@@ -42,8 +40,8 @@ local function card(parent, key, onClick)
   b.desc:SetPoint("TOPLEFT", b.title, "BOTTOMLEFT", 0, -3)
   b.desc:SetPoint("RIGHT", -8, 0)
   b.desc:SetText(L.cards[key] or "")
-  b:SetScript("OnEnter", function() b.line:SetColor(ACCENT, .8) end)
-  b:SetScript("OnLeave", function() b.line:SetColor(C.lineStrong, 1) end)
+  b:SetScript("OnEnter", function() b:Look(true) end)
+  b:SetScript("OnLeave", function() b:Look(false) end)
   b:SetScript("OnClick", function() onClick(key) end)
   return b
 end
@@ -54,15 +52,11 @@ local function build()
   pop:SetWidth(W)
   pop:EnableMouse(true)
   pop:SetClampedToScreen(true)
-  pop.bg = UI.Round(pop, "BACKGROUND", 0, 8)
-  pop.bg:SetColor(C.stone, .97)
-  pop.line = UI.Round(pop, "BORDER", 0, 8, "line")
-  pop.line:SetColor(C.frameGold, .7)
+  P.Panel(pop)
   tinsert(UISpecialFrames, "ParleyNewTab")
-
-  pop.title = UI.Text(pop, "title", 17, C.gold)
-  pop.title:SetPoint("TOPLEFT", PAD, -12)
-  pop.title:SetText(L.newTab)
+  P.PanelTitle(pop, L.newTab, 18, PAD, -11, TOP - 12)
+  pop.close = UI.CloseButton(pop, function() pop:Hide() end)
+  pop.close:SetPoint("TOPRIGHT", -9, -9)
 
   local function addPreset(key)
     local tab = P.TABS[key]()
@@ -73,11 +67,11 @@ local function build()
   for i, key in ipairs(CARDS) do
     local c = card(pop, key, addPreset)
     local col, row = (i - 1) % 3, math.floor((i - 1) / 3)
-    c:SetPoint("TOPLEFT", PAD + col * (c:GetWidth() + GAP), -40 - row * (CARD_H + GAP))
+    c:SetPoint("TOPLEFT", PAD + col * (c:GetWidth() + GAP), -TOP - row * (CARD_H + GAP))
     pop.cards[i] = c
   end
   local rows = math.ceil(#CARDS / 3)
-  pop.mixY = -40 - rows * (CARD_H + GAP) - 6
+  pop.mixY = -TOP - rows * (CARD_H + GAP) - 6
 
   pop.mixLabel = UI.Text(pop, "bold", 13, C.text)
   pop.mixLabel:SetPoint("TOPLEFT", PAD, pop.mixY)
@@ -106,6 +100,7 @@ local function build()
   pop.add:SetSize(84, 26)
   pop.cancel = P.Own(UI.Button(pop, L.cancel, "quiet", function() pop:Hide() end))
   pop.cancel:SetSize(74, 26)
+  pop:Hide()   -- so its first opening fades in too
 end
 
 -- the chips flow in rows across the builder; the builder grows to fit them

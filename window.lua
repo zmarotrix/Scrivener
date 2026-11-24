@@ -1,4 +1,4 @@
--- Windows, tabs, panes and the message frames inside them (the look: design/suite/parley.html).
+-- Windows, tabs, panes and the message frames inside them (the design: design/suite/parley.html; the look: look.lua).
 -- A window is a dark glass panel holding tabs. A tab shows one pane, or up to three side by side; each pane is a mix of
 -- chats (or For you, or a search) under a small header naming what's in it, drawn by a ScrollingMessageFrame, the game's
 -- own widget, which can show hidden lines and edit lines already shown. Drag a tab onto another window's tab bar to move
@@ -15,15 +15,14 @@ P.windows = {}        -- live windows, by index into db.windows
 P.tabFrames = {}      -- [pane data] = { frame, head, smf, win, tab, unread, newCount } (a tab is its own first pane)
 
 local ACCENT = UI.Hex(P.ACCENT_HEX)
-local BAR_H, PAD = 27, 6       -- the mock-up's 30 px tab bar, its rule underneath
+local BAR_H, PAD = 27, 6       -- a 30 px tab bar, its rule underneath
 local RULE_Y = BAR_H + 2        -- where the rule under the tab bar sits, from the top
-P.GLASS = { 11 / 255, 9 / 255, 7 / 255 }               -- the window's dark glass (alpha is the Background setting)
-local EDGE = { 231 / 255, 198 / 255, 108 / 255 }        -- the faint gold of its border and rules
 local HEAD_H = 22               -- a pane's header: its name and the chats in it
 P.COMPOSE_H = 30                -- the chat box at the bottom of the docked window
 local MAX_PANES = 3
+local MARK = 20                 -- Parley's mark at the left of the tab bar
 
----A dashed outline around a frame (arrange mode, the alerts box): white dashes (media/dash-*.tga) repeated along each
+---A dashed outline around a frame (arrange mode): white dashes (media/dash-*.tga) repeated along each
 ---edge and tinted. :SetColor(c, alpha), :SetShown(on).
 function P.Dashed(frame, c, alpha, layer)
   local edges = {}
@@ -457,23 +456,21 @@ local function newMessageFrame(tab)
   head:SetPoint("TOPRIGHT")
   head:SetHeight(HEAD_H)
   head:RegisterForClicks("RightButtonUp")
-  head.name = UI.Text(head, "bold", 12, C.muted)
+  head.name = UI.Text(head, "bold", 12, P.TAB_OFF)
   head.name:SetPoint("LEFT", 8, 0)
   pcall(head.name.SetIgnoreParentAlpha, head.name, true)   -- the pane's name stays when the headers fade
   head.list = UI.Text(head, "body", 12, C.faint)
   head.list:SetPoint("LEFT", head.name, "RIGHT", 7, 0)
   head.list:SetPoint("RIGHT", head, "RIGHT", -22, 0)
-  head.rule = head:CreateTexture(nil, "BORDER")
-  head.rule:SetColorTexture(231 / 255, 198 / 255, 108 / 255, .07)
+  head.rule = P.Hairline(head)
   head.rule:SetPoint("BOTTOMLEFT", 0, 0)
   head.rule:SetPoint("BOTTOMRIGHT", 0, 0)
   head.rule:SetHeight(1)
   head.close = CreateFrame("Button", nil, head)
   head.close:SetSize(16, 16)
   head.close:SetPoint("RIGHT", -3, 0)
-  head.close.text = UI.Text(head.close, "body", 14, C.faint)
-  head.close.text:SetPoint("CENTER", 0, 1)
-  head.close.text:SetText("\195\151")
+  head.close.icon = UI.Icon(head.close, "close", 8, C.muted)
+  head.close.icon:SetPoint("CENTER")
   local m = CreateFrame("ScrollingMessageFrame", nil, holder)
   m:SetPoint("TOPLEFT", head, "BOTTOMLEFT", 0, -3)
   m:SetPoint("BOTTOMRIGHT", holder, "BOTTOMRIGHT", 0, 2)
@@ -729,12 +726,8 @@ function P:AskText(title, text, onAccept, note)
     ask:SetFrameStrata("DIALOG")
     ask:EnableMouse(true)
     ask:SetClampedToScreen(true)
-    ask.bg = UI.Round(ask, "BACKGROUND", 0, 8)
-    ask.bg:SetColor(C.stone, .97)
-    ask.line = UI.Round(ask, "BORDER", 0, 8, "line")
-    ask.line:SetColor(ACCENT, .5)
-    ask.title = UI.Text(ask, "title", 15, C.text)
-    ask.title:SetPoint("TOPLEFT", 14, -12)
+    P.Panel(ask, 60)
+    P.PanelTitle(ask, "", 16, 14, -11)
     ask.note = UI.Text(ask, "body", 12, C.muted)
     ask.note:SetPoint("TOPLEFT", ask.title, "BOTTOMLEFT", 0, -3)
     ask.close = UI.CloseButton(ask, function() ask:Hide() end)
@@ -758,6 +751,7 @@ function P:AskText(title, text, onAccept, note)
       C_Timer.After(0, function() if not ask.onAccept then ask:Hide() end end)
     end)
     tinsert(UISpecialFrames, "ParleyAskFrame")
+    ask:Hide()   -- so its first opening fades in too
   end
   ask.title:SetText(title)
   ask.note:SetText(note or "")
@@ -990,6 +984,13 @@ end
 
 function P:WindowMenu(win, owner)
   menu(owner, function(root)
+    if (win.hiddenTabs or 0) > 0 then   -- the tabs there was no room for
+      root:CreateTitle(L.moreTabs)
+      for i, tab in ipairs(win.data.tabs) do
+        if not win.buttons[i]:IsShown() then root:CreateButton(tab.name, function() P:SelectTab(win, i, true) end) end
+      end
+      root:CreateDivider()
+    end
     root:CreateButton(L.newWindow, function() P:NewWindow() end)
     local lay = root:CreateButton(L.layouts)
     for _, key in ipairs({ "one", "sides", "social", "group", "trader" }) do
@@ -1083,16 +1084,15 @@ local function savePosition(win)
 end
 P.SavePosition = savePosition
 
-local function iconButton(parent, glyph, tip, onClick)
+local function iconButton(parent, icon, size, tip, onClick)
   local b = CreateFrame("Button", nil, parent)
   b:SetSize(18, 18)
-  b.text = UI.Text(b, "bold", 14, C.muted)
-  b.text:SetPoint("CENTER")
-  b.text:SetText(glyph)
+  b.icon = UI.Icon(b, icon, size, C.muted)
+  b.icon:SetPoint("CENTER")
   b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
   b:SetScript("OnClick", onClick)
-  b:SetScript("OnEnter", function(self) self.text:SetTextColor(C.text[1], C.text[2], C.text[3]); UI.Tip(self, tip) end)
-  b:SetScript("OnLeave", function(self) self.text:SetTextColor(C.muted[1], C.muted[2], C.muted[3]); GameTooltip:Hide() end)
+  b:SetScript("OnEnter", function(self) self.icon:SetVertexColor(C.text[1], C.text[2], C.text[3]); UI.Tip(self, tip) end)
+  b:SetScript("OnLeave", function(self) self.icon:SetVertexColor(C.muted[1], C.muted[2], C.muted[3]); GameTooltip:Hide() end)
   return b
 end
 
@@ -1108,14 +1108,11 @@ local function createWindow(index)
   pcall(f.SetDontSavePosition, f, true)
   f:EnableMouse(false)
 
-  -- dark glass, a faint gold border all round, and a rule under the tab bar (the mock-up's .pw and .tabs)
-  win.bg = UI.Round(f, "BACKGROUND", 0, 6)
-  win.outline = UI.Round(f, "BORDER", 0, 6, "line")
-  win.outline:SetColor(EDGE, .22)
+  -- the suite's materials on a see-through back (look.lua), and the accent's line under the tab bar, fading away
+  P.Glass(win)
   win.rule = f:CreateTexture(nil, "BORDER", nil, 1)
-  win.rule:SetColorTexture(EDGE[1], EDGE[2], EDGE[3], .14)
-  win.rule:SetPoint("TOPLEFT", f, "TOPLEFT", 1, -RULE_Y)
-  win.rule:SetPoint("TOPRIGHT", f, "TOPRIGHT", -1, -RULE_Y)
+  win.rule:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -RULE_Y)
+  win.rule:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, -RULE_Y)
   win.rule:SetHeight(1)
 
   local bar = CreateFrame("Frame", nil, f)
@@ -1129,12 +1126,27 @@ local function createWindow(index)
   bar:SetScript("OnDragStart", function() if not P.db.locked then P:BeginMove(win) end end)
   bar:SetScript("OnDragStop", function() P:EndMove(win) end)
 
-  win.menuButton = iconButton(bar, "\226\128\166", L.settings, function(self) P:WindowMenu(win, self) end)
+  -- Parley's mark, on the window with the chat box (UpdateTabs): the window's menu, and a place to drag it by
+  win.mark = CreateFrame("Button", nil, bar)
+  win.mark:SetSize(MARK, MARK)
+  win.mark:SetPoint("LEFT", 0, 0)
+  win.mark.tex = UI.Smooth(win.mark:CreateTexture(nil, "ARTWORK"))
+  win.mark.tex:SetAllPoints()
+  win.mark.tex:SetTexture(P.MARK .. "-small")
+  win.mark:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+  win.mark:RegisterForDrag("LeftButton")
+  win.mark:SetScript("OnClick", function(self) P:WindowMenu(win, self) end)
+  win.mark:SetScript("OnEnter", function(self) UI.Tip(self, L.settings) end)
+  win.mark:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  win.mark:SetScript("OnDragStart", function() if not P.db.locked then P:BeginMove(win) end end)
+  win.mark:SetScript("OnDragStop", function() P:EndMove(win) end)
+  win.mark:Hide()
+
+  win.menuButton = iconButton(bar, "gear", 14, L.settings, function(self) P:WindowMenu(win, self) end)
   win.menuButton:SetPoint("RIGHT", 0, 0)
-  win.plus = iconButton(bar, "+", L.newTab, function(self)
+  win.plus = iconButton(bar, P.MEDIA .. "plus", 13, L.newTab, function(self)
     if P.OpenNewTab then P:OpenNewTab(win, self) else P:PlusMenu(win, self) end   -- the mock-up's builder
   end)   -- placed after the last tab
-  win.plus.text:SetFontObject(UI.Font("body", 17))
   win.search = CreateFrame("Button", nil, bar)
   win.search:SetSize(18, 18)
   win.search:SetPoint("RIGHT", win.menuButton, "LEFT", -4, 0)
@@ -1157,13 +1169,16 @@ local function createWindow(index)
   win.split:SetScript("OnClick", function(self) P:SplitMenu(win, self) end)
   win.split:SetScript("OnEnter", function(self) UI.Tip(self, L.splitTitle) end)
   win.split:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  win.search.icon = UI.Icon(win.search, "search", 12, C.muted)
+  win.search.icon = UI.Icon(win.search, "search", 13, C.muted)
   win.search.icon:SetPoint("CENTER")
   win.search:SetScript("OnClick", function()
     if win.searchView and win.searchView:IsShown() then P:CloseSearch(win) else P:OpenSearch(win) end
   end)
   win.search:SetScript("OnEnter", function(self) UI.Tip(self, L.searchHint) end)
   win.search:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+  win.measure = UI.Text(bar, "title", 14)   -- for the tabs' names (P.TabNameWidth)
+  win.measure:Hide()
 
   local body = CreateFrame("Frame", nil, f)
   win.body = body
@@ -1189,19 +1204,20 @@ local function createWindow(index)
   local grip = CreateFrame("Button", nil, f)
   win.grip = grip
   grip:SetSize(14, 14)
-  grip:SetPoint("BOTTOMRIGHT", -2, 2)
+  grip:SetPoint("BOTTOMRIGHT", -3, 3)   -- inside the round corner
   grip:SetFrameLevel(body:GetFrameLevel() + 20)
-  grip.tex = grip:CreateTexture(nil, "OVERLAY")
+  grip.tex = UI.Smooth(grip:CreateTexture(nil, "OVERLAY"))
   grip.tex:SetAllPoints()
-  grip.tex:SetTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+  grip.tex:SetTexture(P.MEDIA .. "grip")
+  grip.tex:SetVertexColor(ACCENT[1], ACCENT[2], ACCENT[3])
   grip:SetScript("OnMouseDown", function() if not P.db.locked then f:StartSizing("BOTTOMRIGHT") end end)
   grip:SetScript("OnMouseUp", function() f:StopMovingOrSizing(); savePosition(win) end)
 
   f:SetScript("OnSizeChanged", function() if win.data then P:UpdateTabs(win) end end)
 
-  -- The tabs, headers, border and rules show; with "Fade the headers" on they fade out two seconds after the mouse
+  -- The tabs, headers, wash and rules show; with "Fade the headers" on they fade out two seconds after the mouse
   -- leaves the window's neighbourhood, and come back when it's near. The small buttons brighten on mouse-over.
-  win.chrome, win.headers, win.away = 0, 1, 0
+  win.chrome, win.headers, win.away = 1, 1, 0   -- the buttons and the grip fade to their rest at once
   local elapsed = 0
   f:SetScript("OnUpdate", function(_, dt)
     elapsed = elapsed + dt
@@ -1222,7 +1238,6 @@ local function createWindow(index)
     if math.abs(win.chrome - target) > .01 then
       win.chrome = win.chrome + (target - win.chrome) * .5
       local show = win.chrome
-      P:PaintWindow(win)
       grip:SetAlpha(P.db.locked and 0 or show)
       local icons = .45 + .55 * show
       win.plus:SetAlpha(icons); win.menuButton:SetAlpha(icons); win.search:SetAlpha(icons); win.split:SetAlpha(icons)
@@ -1231,13 +1246,27 @@ local function createWindow(index)
   return win
 end
 
+local function paintTab(b)
+  local on, hover = b.active, b.hover
+  local c = on and P.TAB_ON or (hover and C.text or P.TAB_OFF)
+  b.label:SetTextColor(c[1], c[2], c[3])
+  -- the shown tab is lit from below; the mouse gets a fainter light (UI.Tabs)
+  b.wash:SetVertexColor(ACCENT[1], ACCENT[2], ACCENT[3], on and .34 or .12)
+  b.wash:SetShown(on or hover or false)
+  b.line:SetVertexColor(ACCENT[1], ACCENT[2], ACCENT[3], on and 1 or .35)
+  b.line:SetShown(on or hover or false)
+end
+
 local function tabButton(win, i)
   local b = win.buttons[i]
   if b then return b end
   b = CreateFrame("Button", nil, win.bar)
   b:SetHeight(BAR_H)
-  b.label = UI.Text(b, "body", 13, C.muted)
-  b.label:SetPoint("LEFT", 10, 0)
+  b.wash = b:CreateTexture(nil, "BACKGROUND")
+  b.wash:SetTexture(UI.TEX.tabGlow)
+  b.wash:SetPoint("TOPLEFT")
+  b.wash:SetPoint("BOTTOMRIGHT", 0, -1)
+  b.label = UI.Text(b, "title", 14, C.muted)
   -- unread: an accent badge with dark figures (the mock-up's .tab .b)
   b.badge = CreateFrame("Frame", nil, b)
   b.badge:SetHeight(16)
@@ -1246,14 +1275,14 @@ local function tabButton(win, i)
   b.badge.bg:SetColor(ACCENT, 1)
   b.count = UI.Text(b.badge, "bold", 11, { 16 / 255, 18 / 255, 31 / 255 })
   b.count:SetPoint("CENTER", 0, 0)
-  -- the active tab's accent underline sits on the rule
+  -- the active tab's line sits on the rule, fading at its ends
   b.line = b:CreateTexture(nil, "ARTWORK")
-  b.line:SetColorTexture(ACCENT[1], ACCENT[2], ACCENT[3], 1)
+  b.line:SetTexture(UI.TEX.tabLine)
   b.line:SetPoint("BOTTOMLEFT", 0, -1)
   b.line:SetPoint("BOTTOMRIGHT", 0, -1)
   b.line:SetHeight(2)
-  b:SetScript("OnEnter", function(self) if not self.active then self.label:SetTextColor(C.text[1], C.text[2], C.text[3]) end end)
-  b:SetScript("OnLeave", function(self) if not self.active then self.label:SetTextColor(C.muted[1], C.muted[2], C.muted[3]) end end)
+  b:SetScript("OnEnter", function(self) self.hover = true; paintTab(self) end)
+  b:SetScript("OnLeave", function(self) self.hover = false; paintTab(self) end)
   b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
   b:RegisterForDrag("LeftButton")
   b:SetScript("OnClick", function(self, button)
@@ -1266,37 +1295,99 @@ local function tabButton(win, i)
   return b
 end
 
+-- How the tabs share the bar. Their names' size and the mark are settled by the names and a fixed allowance for badges, so
+-- a line arriving, or a tab being read, moves nothing about: the room around the names gives way. Only more badges than the
+-- allowance change them. When the tabs still don't fit, the last ones that aren't showing step aside (the window's menu
+-- lists them).
+local PAD_MOST, PAD_LEAST, TAB_GAP, BADGE_GAP = 11, 4, 1, 5
+local BADGES, BADGE_W = 2, 31   -- the allowance: two tabs with a two-figure badge
+local AT_RIGHT = 62 + 23        -- gear, search and split (18 each, 4 between), and the + after the last tab (4 + 18 + 1)
+
+-- Marcellus, the suite's title font, has Latin letters only: a name with Greek, Cyrillic or the like keeps the body font
+local function tabRole(name) return name:find("[\198-\225\227-\244]") and "body" or "title" end
+
+---A tab name's width at a size, remembered per window until its scale changes.
+function P.TabNameWidth(win, name, size)
+  local scale = win.bar:GetEffectiveScale()
+  if win.nameScale ~= scale then win.nameScale, win.nameWidths = scale, {} end
+  local key = size .. ":" .. name
+  local w = win.nameWidths[key]
+  if not w then
+    win.measure:SetFontObject(UI.Font(tabRole(name), size))
+    win.measure:SetText(name)
+    w = win.measure:GetStringWidth() or 0
+    if w > 0 then win.nameWidths[key] = w end
+  end
+  return w
+end
+
 function P:UpdateTabs(win)
-  local x = 0
+  local tabs = win.data.tabs
+  local n = #tabs
   local width = win.frame:GetWidth()
   if not width or width < 50 then width = win.data.w or 400 end
-  local room = width - 2 * PAD - 46 - 24   -- search and the menu sit at the right, + after the last tab
-  for i, tab in ipairs(win.data.tabs) do
+  local room = width - 2 * PAD - AT_RIGHT
+  -- the badges, and the names at each size
+  local badges, names = 0, { [14] = 0, [13] = 0 }
+  for i, tab in ipairs(tabs) do
     local b = tabButton(win, i)
     b.index = i
-    local tf = self.tabFrames[tab]
-    local active = win.data.active == i
-    b.label:SetText(tab.name)
-    b.active = active
-    if active then b.label:SetTextColor(1, 1, 1) else b.label:SetTextColor(C.muted[1], C.muted[2], C.muted[3]) end
-    pcall(b.label.SetIgnoreParentAlpha, b.label, active)   -- the shown tab keeps its name when the tab bar fades
+    b.active = win.data.active == i
     local unread = 0
     for _, pane in ipairs(panesOf(tab)) do unread = unread + ((self.tabFrames[pane] or {}).unread or 0) end
     b.count:SetText(unread > 0 and (unread > 99 and "99+" or tostring(unread)) or "")
     b.badge:SetWidth(math.max(16, (b.count:GetStringWidth() or 0) + 10))
     b.badge:SetShown(unread > 0)
-    b.line:SetShown(active)
-    local w = b.label:GetStringWidth() + 20 + (unread > 0 and (b.badge:GetWidth() + 5) or 0)
+    b.extra = unread > 0 and b.badge:GetWidth() + BADGE_GAP or 0
+    badges = badges + b.extra
+    for size in pairs(names) do names[size] = names[size] + P.TabNameWidth(win, tab.name, size) end
+  end
+  local marked = (self.dockWin or self.windows[1]) == win
+  local left = marked and MARK + 5 or 0
+  local least = math.max(0, n - 1) * TAB_GAP + 2 * n * PAD_LEAST
+  local extra = math.max(badges, math.min(math.max(0, n - 1), BADGES) * BADGE_W)
+  local size = left + names[14] + least + extra <= room and 14 or 13
+  if left + names[size] + least + extra > room then marked, left = false, 0 end   -- small windows keep the room for their tabs
+  win.mark:SetShown(marked)
+  local free = room - left - names[size] - badges - math.max(0, n - 1) * TAB_GAP
+  local pad = math.max(PAD_LEAST, math.min(PAD_MOST, math.floor(free / (2 * math.max(1, n)))))
+
+  local function widthOf(i) return P.TabNameWidth(win, tabs[i].name, size) + 2 * pad + win.buttons[i].extra end
+  -- the shown tab always has its place; the others fill what's left, in order
+  local active = tabs[win.data.active] and win.data.active
+  local spare = room - left - (active and widthOf(active) or 0)
+  local x, full = left, false
+  win.hiddenTabs = 0
+  for i, tab in ipairs(tabs) do
+    local b = win.buttons[i]
+    local w = widthOf(i)
+    local fits = i == active or (i == 1 and not active)
+    if not fits and not full then
+      fits = w + TAB_GAP <= spare
+      if fits then spare = spare - w - TAB_GAP else full = true end   -- from here on, only the shown tab
+    end
+    b.label:SetText(tab.name)
+    local look = tabRole(tab.name) .. size
+    if b.look ~= look then
+      b.look = look
+      b.label:SetFontObject(UI.Font(tabRole(tab.name), size))
+    end
+    if b.pad ~= pad then
+      b.pad = pad
+      b.label:ClearAllPoints()
+      b.label:SetPoint("LEFT", pad, 0)
+    end
+    paintTab(b)   -- after the font, which may bring its own colour
+    pcall(b.label.SetIgnoreParentAlpha, b.label, b.active)   -- the shown tab keeps its name when the tab bar fades
     b:SetWidth(w)
     b:ClearAllPoints()
     b:SetPoint("LEFT", win.bar, "LEFT", x, 0)
-    local fits = x + w <= room or i == 1
     b:SetShown(fits)
-    if fits then x = x + w + 1 end
+    if fits then x = x + w + TAB_GAP else win.hiddenTabs = win.hiddenTabs + 1 end
   end
-  for i = #win.data.tabs + 1, #win.buttons do win.buttons[i]:Hide() end
+  for i = n + 1, #win.buttons do win.buttons[i]:Hide() end
   win.plus:ClearAllPoints()
-  win.plus:SetPoint("LEFT", win.bar, "LEFT", x + 4, 0)   -- + sits right after the last tab, as in the mock-up
+  win.plus:SetPoint("LEFT", win.bar, "LEFT", x - TAB_GAP + 4, 0)   -- + sits right after the last tab, as in the mock-up
 end
 
 function P:SelectTab(win, index, byPlayer)
@@ -1463,8 +1554,7 @@ function P:LayoutPanes(win)
   for i, h in ipairs(handles) do
     local sep = win.seps[i]
     if not sep then
-      sep = win.body:CreateTexture(nil, "BORDER")
-      sep:SetColorTexture(EDGE[1], EDGE[2], EDGE[3], .12)
+      sep = P.Hairline(win.body, .07)
       win.seps[i] = sep
     end
     sep:ClearAllPoints()
@@ -1534,10 +1624,9 @@ function P:Arrange(win, tab, mode)
   self:LayoutPanes(win)
 end
 
----The headers' alpha (tab bar, rules, border, pane headers, an idle chat box): 1, or fading with "Fade the headers".
+---The headers' alpha (tab bar, wash, rules, pane headers, an idle chat box): 1, or fading with "Fade the headers".
 function P:SetChromeAlpha(win, a)
   win.bar:SetAlpha(a)
-  win.rule:SetAlpha(a)
   self:PaintWindow(win)
   for _, sep in ipairs(win.seps) do sep:SetAlpha(a) end
   local tab = win.data and win.data.tabs[win.data.active]
@@ -1548,15 +1637,12 @@ function P:SetChromeAlpha(win, a)
   if self.SetComposeAlpha and self.dockWin == win then self:SetComposeAlpha(a) end
 end
 
----The window's glass and border. Their strength lives in the textures' colour (Core.UI.Round), and on this client a
----texture's SetAlpha writes that same value, so everything goes through one SetColor: the opacity setting, times the
----header fade when the background fades too; the border's faint gold, brighter on mouse-over, times the header fade.
+---The window's glass, shadow, light and wash: the opacity setting, times the header fade when the background fades too.
 function P:PaintWindow(win)
   local headers = win.headers or 1
   local glass = self.db.alpha or .8
   if self.db.fadeBackground then glass = glass * headers end
-  win.bg:SetColor(P.GLASS, glass)
-  win.outline:SetColor(EDGE, (.22 + .14 * (win.chrome or 0)) * headers)
+  P.PaintGlass(win, glass, headers)
 end
 
 function P:SetOpacity(v)
@@ -1695,7 +1781,7 @@ function P:StartTabDrag(win, button)
     ghost:SetFrameStrata("TOOLTIP")
     ghost:SetSize(120, 24)
     ghost.bg = UI.Round(ghost, "BACKGROUND", 0, 4)
-    ghost.bg:SetColor({ 20 / 255, 18 / 255, 30 / 255 }, .95)
+    ghost.bg:SetColor(UI.Mix(C.stone, ACCENT, .05), .97)
     ghost.line = UI.Round(ghost, "BORDER", 0, 4, "line")
     ghost.line:SetColor(ACCENT, 1)
     ghost.text = UI.Text(ghost, "body", 13, C.text)

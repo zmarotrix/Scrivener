@@ -9,7 +9,7 @@ local UI = P.UI
 local C = UI.C
 
 local ACCENT = UI.Hex(P.ACCENT_HEX)
-local EDGE = { 231 / 255, 198 / 255, 108 / 255 }
+local OTHER = { 1, 1, 1 }          -- the outline of a layout's other windows in its picture
 local KEYS = { "one", "sides", "social", "group", "trader" }
 local W, PAD, GAP = 860, 22, 12
 local CARD_W = math.floor((W - 2 * PAD - (#KEYS - 1) * GAP) / #KEYS)
@@ -49,8 +49,8 @@ local function drawMini(mini, key)
     bg:SetAllPoints()
     bg:SetColorTexture(11 / 255, 9 / 255, 7 / 255, .85)
     local main = i == 1
-    local c = main and ACCENT or EDGE
-    local a = main and .7 or .25
+    local c = main and ACCENT or OTHER
+    local a = main and .7 or .2
     for _, side in ipairs({ { "TOPLEFT", "TOPRIGHT", true }, { "BOTTOMLEFT", "BOTTOMRIGHT", true },
         { "TOPLEFT", "BOTTOMLEFT" }, { "TOPRIGHT", "BOTTOMRIGHT" } }) do
       local t = r:CreateTexture(nil, "BORDER")
@@ -71,9 +71,7 @@ end
 local function choose(key)
   modal.selected = key
   for _, card in ipairs(modal.cards) do
-    local on = card.key == key
-    card.line:SetColor(on and ACCENT or C.lineStrong, 1)
-    card.glow:SetShown(on)
+    card:Look(false, card.key == key)
   end
   local name = L.layout[key][1]
   modal.use.label:SetText(L.useLayout:format(name))
@@ -95,13 +93,8 @@ local function build()
   modal:SetPoint("CENTER", 0, 40)
   modal:SetFrameLevel(dim:GetFrameLevel() + 5)
   modal:EnableMouse(true)
-  modal.bg = UI.Round(modal, "BACKGROUND", 0, 7)
-  modal.bg:SetColor(C.stone2, 1)
-  modal.line = UI.Round(modal, "BORDER", 0, 7, "line")
-  modal.line:SetColor(C.frameGold, 1)
-  modal.title = UI.Text(modal, "title", 22, C.gold)
-  modal.title:SetPoint("TOPLEFT", PAD, -20)
-  modal.title:SetText(L.layoutTitle)
+  P.Panel(modal, 140)
+  P.PanelTitle(modal, L.layoutTitle, 22, PAD, -20)
   modal.sub = UI.Text(modal, "body", 14, C.muted)
   modal.sub:SetPoint("TOPLEFT", modal.title, "BOTTOMLEFT", 0, -5)
   modal.sub:SetText(L.layoutSub)
@@ -112,16 +105,7 @@ local function build()
     local card = CreateFrame("Button", nil, modal)
     card.key = key
     card:SetWidth(CARD_W)
-    card.bg = UI.Round(card, "BACKGROUND", 0, 6)
-    card.bg:SetColor({ 0, 0, 0 }, .3)
-    card.glow = card:CreateTexture(nil, "BACKGROUND", nil, -1)
-    card.glow:SetTexture(UI.TEX.glow)
-    card.glow:SetVertexColor(ACCENT[1], ACCENT[2], ACCENT[3], .35)
-    card.glow:SetPoint("TOPLEFT", -14, 14)
-    card.glow:SetPoint("BOTTOMRIGHT", 14, -14)
-    card.glow:Hide()
-    card.line = UI.Round(card, "BORDER", 0, 6, "line")
-    card.line:SetColor(C.lineStrong, 1)
+    P.Card(card)
     local mini = CreateFrame("Frame", nil, card)
     mini:SetPoint("TOPLEFT", 10, -10)
     mini:SetSize(CARD_W - 20, MINI_H)
@@ -142,8 +126,8 @@ local function build()
     card:SetPoint("TOPLEFT", PAD + (i - 1) * (CARD_W + GAP), -76)
     card:SetScript("OnClick", function() choose(key) end)
     card:SetScript("OnDoubleClick", function() choose(key); P:ApplyLayout(key); dim:Hide() end)
-    card:SetScript("OnEnter", function(self) if modal.selected ~= key then self.line:SetColor(UI.Mix(C.lineStrong, ACCENT, .5), 1) end end)
-    card:SetScript("OnLeave", function(self) if modal.selected ~= key then self.line:SetColor(C.lineStrong, 1) end end)
+    card:SetScript("OnEnter", function(self) self:Look(true, modal.selected == key) end)
+    card:SetScript("OnLeave", function(self) self:Look(false, modal.selected == key) end)
     modal.cards[i] = card
   end
   for _, card in ipairs(modal.cards) do card:SetHeight(cardH) end

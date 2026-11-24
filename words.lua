@@ -4,7 +4,7 @@
 Parley = Parley or {}
 
 Parley.L = {
-  needsCore = "Parley needs Norgannon Core 1.28 or newer; it is turned off.",
+  needsCore = "Parley needs Norgannon Core 1.35 or newer; it is turned off.",
   role = "Chat",
 
   -- the kinds of chat a tab can mix (fallbacks when the game has no string of its own)
@@ -154,6 +154,7 @@ Parley.L = {
   copyTitle = "Copy",
   ok = "OK",
   newLines = "%d new",
+  moreTabs = "More tabs",
   tabName = "Tab name",
 
   -- first run and layouts
@@ -254,7 +255,7 @@ Parley.L = {
     fadeBackgroundDesc = "With Fade headers, the window's dark background fades as well and only the lines stay.",
     barMiddle = "Bar between the chat and the sender",
     barMiddleDesc = "The coloured bar moves from the start of the line to after the time and the chat's short name.",
-    fadeChromeDesc = "When the mouse is away: the tab bar, pane headers, border and the chat box fade; the lines stay.",
+    fadeChromeDesc = "When the mouse is away: the tab bar, pane headers and the chat box fade; the lines stay.",
     group = "Run lines from the same person together",
     groupDesc = "Within two minutes, the name and time show once.",
     fade = "Fade old lines",

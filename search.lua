@@ -139,15 +139,13 @@ local function build(win)
   v:Hide()
   win.searchView = v
 
-  -- the box: a pill outlined in Parley's colour
+  -- the box: a suite text field, lit while you type in it
   local bar = CreateFrame("Frame", nil, v)
   bar:SetPoint("TOPLEFT", 10, -8)
   bar:SetPoint("TOPRIGHT", -10, -8)
   bar:SetHeight(26)
-  bar.bg = UI.Round(bar, "BACKGROUND", 0, 13)
-  bar.bg:SetColor({ 0, 0, 0 }, .5)
-  bar.line = UI.Round(bar, "BORDER", 0, 13, "line")
-  bar.line:SetColor(ACCENT, 1)
+  P.FieldLook(bar)
+  v.bar = bar
   bar.icon = UI.Icon(bar, "search", 13, C.muted)
   bar.icon:SetPoint("LEFT", 10, 0)
   bar.hint = UI.Text(bar, "body", 12, C.faint)
@@ -161,6 +159,8 @@ local function build(win)
   edit:SetTextColor(C.text[1], C.text[2], C.text[3])
   edit:SetAutoFocus(false)
   edit:SetMaxLetters(60)
+  edit:HookScript("OnEditFocusGained", function() bar:Light(true) end)
+  edit:HookScript("OnEditFocusLost", function() bar:Light(false) end)
   v.edit = edit
 
   -- where to look
@@ -202,8 +202,7 @@ local function build(win)
       row.jump = UI.Text(content, "body", 12, ACCENT)
       row.jump:SetPoint("RIGHT", -14, 0)
       row.jump:SetText(L.jump)
-      row.rule = content:CreateTexture(nil, "BORDER")
-      row.rule:SetColorTexture(231 / 255, 198 / 255, 108 / 255, .07)
+      row.rule = P.Hairline(content)
       row.rule:SetPoint("BOTTOMLEFT", 0, 0)
       row.rule:SetPoint("BOTTOMRIGHT", 0, 0)
       row.rule:SetHeight(1)

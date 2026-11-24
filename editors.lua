@@ -12,9 +12,10 @@ local C = UI.C
 local ACCENT = UI.Hex(P.ACCENT_HEX)
 local W = 508
 local PANEL_GAP = 24
+local TOP = 52       -- where a panel's contents start, under its title's line
 
 -------------------------------------------------------------------------------------------
--- A panel: dark stone, a strong rule, a gold title, a ×
+-- A panel: the suite window's recipe, its title over the fading line, a close button
 -------------------------------------------------------------------------------------------
 
 local function panel(name, title)
@@ -27,13 +28,8 @@ local function panel(name, title)
   f:RegisterForDrag("LeftButton")
   f:SetScript("OnDragStart", function(self) self:StartMoving() end)
   f:SetScript("OnDragStop", function(self) self:StopMovingOrSizing(); self.moved = true end)
-  f.bg = UI.Round(f, "BACKGROUND", 0, 7)
-  f.bg:SetColor(C.stone2, .97)
-  f.line = UI.Round(f, "BORDER", 0, 7, "line")
-  f.line:SetColor(C.lineStrong, 1)
-  f.title = UI.Text(f, "title", 16, C.gold)
-  f.title:SetPoint("TOPLEFT", 14, -12)
-  f.title:SetText(title)
+  P.Panel(f)
+  P.PanelTitle(f, title, 18, 14, -11, TOP - 12)
   f.close = UI.CloseButton(f, function() f:Hide() end)
   f.close:SetPoint("TOPRIGHT", -8, -8)
   f:Hide()
@@ -178,8 +174,7 @@ local function channelRow(i)
   row.pick = pickable(row, row.sw, function() return row.key end)
   row.cmd = UI.Text(row, "body", 12, C.faint)
   row.cmd:SetPoint("LEFT", row.sw, "RIGHT", 8, 0)
-  row.rule = row:CreateTexture(nil, "BORDER")
-  row.rule:SetColorTexture(231 / 255, 198 / 255, 108 / 255, .07)
+  row.rule = P.Hairline(row)
   row.rule:SetPoint("BOTTOMLEFT")
   row.rule:SetPoint("BOTTOMRIGHT")
   row.rule:SetHeight(1)
@@ -190,7 +185,7 @@ end
 local function buildNames()
   names = panel("ParleyChannelNames", L.namesTitle)
   names.sub = sub(names, L.namesSub)
-  names.sub:SetPoint("TOPLEFT", 14, -36)
+  names.sub:SetPoint("TOPLEFT", 14, -TOP)
   names.sub:SetPoint("RIGHT", -14, 0)
   names.showLabel = UI.Text(names, "body", 14, C.text)
   names.showLabel:SetText(L.set.showAs)
@@ -219,10 +214,10 @@ local function buildNames()
     names.cells[i] = cell
   end
   names.foot = sub(names, L.namesFoot)
-  names:SetScript("OnShow", function() names:Refresh() end)
+  names:HookScript("OnShow", function() names:Refresh() end)
 
   function names:Refresh()
-    local y = -36 - (self.sub:GetStringHeight() or 16) - 12
+    local y = -TOP - (self.sub:GetStringHeight() or 16) - 12
     self.showLabel:ClearAllPoints()
     self.showLabel:SetPoint("TOPLEFT", 14, y - 3)
     self.show:ClearAllPoints()
@@ -321,15 +316,16 @@ end
 local function outPill(parent, out, row)
   local b = CreateFrame("Button", nil, parent)
   b:SetHeight(16)
-  b.bg = UI.Round(b, "BACKGROUND", 0, 8, "line")
+  P.SwitchPill(b)
   b.text = UI.Text(b, "body", 11, C.muted)
   b.text:SetPoint("CENTER", 0, 0)
   b.text:SetText(L.alertOut[out])
   b:SetWidth((b.text:GetStringWidth() or 30) + 14)
   b.out = out
   function b:Paint(on)
-    self.bg:SetColor(on and ACCENT or C.lineStrong, on and .8 or 1)
-    local c = on and ACCENT or C.faint
+    self.lit = on and true or false
+    self:SetLit(self.lit, self.hover)
+    local c = on and C.text or C.muted
     self.text:SetTextColor(c[1], c[2], c[3])
   end
   b:SetScript("OnClick", function(self)
@@ -340,8 +336,16 @@ local function outPill(parent, out, row)
     self:Paint(a.outs[self.out])
     P:CompileAlerts()
   end)
-  b:SetScript("OnEnter", function(self) UI.Tip(self, L.alertOutTip[self.out]) end)
-  b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  b:SetScript("OnEnter", function(self)
+    self.hover = true
+    self:SetLit(self.lit, true)
+    UI.Tip(self, L.alertOutTip[self.out])
+  end)
+  b:SetScript("OnLeave", function(self)
+    self.hover = false
+    self:SetLit(self.lit, false)
+    GameTooltip:Hide()
+  end)
   return b
 end
 
@@ -408,8 +412,7 @@ local function alertRow(i)
     prev = b
     row.outs[OUTS[j]] = b
   end
-  row.rule = row:CreateTexture(nil, "BORDER")
-  row.rule:SetColorTexture(231 / 255, 198 / 255, 108 / 255, .08)
+  row.rule = P.Hairline(row)
   row.rule:SetPoint("BOTTOMLEFT")
   row.rule:SetPoint("BOTTOMRIGHT")
   row.rule:SetHeight(1)
@@ -446,14 +449,12 @@ local function buildAlerts()
   alerts.all:SetScript("OnEnter", function(self) UI.Tip(self, L.alertsAllOn) end)
   alerts.all:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
-  -- the box to add one: dashed, in Parley's colour
+  -- the box to add one: a suite text field
   local add = CreateFrame("Frame", nil, alerts)
-  add:SetPoint("TOPLEFT", 14, -40)
-  add:SetPoint("TOPRIGHT", -14, -40)
+  add:SetPoint("TOPLEFT", 14, -TOP)
+  add:SetPoint("TOPRIGHT", -14, -TOP)
   add:SetHeight(28)
-  add.bg = UI.Round(add, "BACKGROUND", 0, 14)
-  add.bg:SetColor({ 0, 0, 0 }, .35)
-  add.dash = P.Dashed(add, UI.Mix(C.line, ACCENT, .6), 1)
+  P.FieldLook(add)
   local edit = CreateFrame("EditBox", nil, add)
   edit:SetPoint("LEFT", 14, 0)
   edit:SetPoint("RIGHT", -14, 0)
@@ -472,19 +473,21 @@ local function buildAlerts()
     if text and text:match("%S") then P:AddAlert(text); self:SetText("") end
     self:ClearFocus()
   end)
+  edit:HookScript("OnEditFocusGained", function() add:Light(true) end)
+  edit:HookScript("OnEditFocusLost", function() add:Light(false) end)
   add:EnableMouse(true)
   add:SetScript("OnMouseDown", function() edit:SetFocus() end)
   alerts.addEdit = edit
 
   alerts.scroll = P.Own(UI.ScrollArea(alerts))
-  alerts.scroll:SetPoint("TOPLEFT", 14, -78)
+  alerts.scroll:SetPoint("TOPLEFT", 14, -(TOP + 38))
   alerts.scroll:SetPoint("RIGHT", -14, 0)
   alerts.rows = {}
   alerts.none = UI.Text(alerts.scroll.content, "body", 13, C.faint)
   alerts.none:SetPoint("TOPLEFT", 0, -6)
   alerts.none:SetText(L.alertsNone)
   alerts.foot = sub(alerts, L.alertsFoot)
-  alerts:SetScript("OnShow", function() alerts:Refresh() end)
+  alerts:HookScript("OnShow", function() alerts:Refresh() end)
 
   function alerts:Refresh()
     self.all:SetOn(not P.db.paused, true)
@@ -511,7 +514,7 @@ local function buildAlerts()
     self.foot:ClearAllPoints()
     self.foot:SetPoint("TOPLEFT", self.scroll, "BOTTOMLEFT", 0, -10)
     self.foot:SetPoint("RIGHT", -14, 0)
-    self:SetHeight(78 + h + 10 + (self.foot:GetStringHeight() or 30) + 14)
+    self:SetHeight(TOP + 38 + h + 10 + (self.foot:GetStringHeight() or 30) + 14)
   end
 end
 

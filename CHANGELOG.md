@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.8.0 (2026-11-23)
+
+- **Parley looks like the rest of the suite.** Windows are rounded panels with a soft shadow and light along the top, in
+  place of the gold outline. Parley's colour washes over the tab bar, with the suite's fading line under it. The back
+  under your chat lines is as dark as before, because a lighter one made chat harder to read over bright ground. Your
+  opacity setting and fading headers work as they did, and opacity 0 is fully clear.
+- Tabs are the suite's: names in its title font, the open one lit from below. Parley's mark sits on the window with the
+  chat box and opens the window's menu. The gear, plus, close and resize grip are drawn to match.
+- The chat box is a recessed field that glows while you type. The chip beside it is a raised pill.
+- New tab, the layout picker, Channel names, Alerts, the copy box, arrange mode's bar and toasts are drawn as suite
+  windows, and fade in.
+- Tabs that don't fit are listed under More tabs in the window's menu, and the tab you're looking at always shows.
+  Unread badges no longer move the other tabs about.
+- **Picking someone in the whisper list no longer takes the keyboard.** 0.7.5 fixed this only until the first line you
+  sent: in the game's usual chat style the chat box stays on screen between lines, and Parley took that for typing. The
+  chip now shows who your next line will go to, and choosing somewhere else, from the chip or a channel's tag, wins.
+- Needs Norgannon Core 1.35.
+
 ## 0.7.11 (2026-11-23)
 
 - Parley's buttons, switches, selectors, text fields and scrollbars are in Parley's colour. Since Norgannon Core 1.31

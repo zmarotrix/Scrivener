@@ -73,4 +73,4 @@ lines the game prints itself (the guild's message of the day, level-ups, /played
 
 ## Needs
 
-Norgannon Core 1.28 or newer.
+Norgannon Core 1.35 or newer.

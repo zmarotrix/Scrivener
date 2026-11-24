@@ -263,8 +263,7 @@ function P:BuildRail(pane, tf)
   rail:SetPoint("TOPLEFT", holder, "TOPLEFT", 0, 0)
   rail:SetPoint("BOTTOMLEFT", holder, "BOTTOMLEFT", 0, 0)
   rail:SetWidth(RAIL_W)
-  rail.line = rail:CreateTexture(nil, "BORDER")
-  rail.line:SetColorTexture(231 / 255, 198 / 255, 108 / 255, .12)
+  rail.line = P.Hairline(rail, .07)
   rail.line:SetPoint("TOPRIGHT")
   rail.line:SetPoint("BOTTOMRIGHT")
   rail.line:SetWidth(1)
@@ -343,7 +342,8 @@ function P:SelectPerson(tf, pane, key, byPlayer)
   if self.UpdateTabs and tf.win then self:UpdateTabs(tf.win) end
   if not (byPlayer and c) then return end
   local box = self.box
-  local open = box and box:IsShown()
+  -- typing, not just showing: in the game's IM chat style (its default) the box stays shown between lines
+  local open = box and box:HasFocus()
   local text = open and box:GetText() or ""
   if open and type(text) == "string" and not Hidden(text) and text == "" then
     self.replyTo = nil
@@ -359,16 +359,43 @@ end
 function P:ConvoBoxOpened(box)
   local a = self.replyTo
   if not a then return end
-  self.replyTo = nil
-  local opened = GetTime()
-  C_Timer.After(0, function()   -- after the game's own call that opened it, which says where it goes last
-    if (self.toldAt or -1) >= opened or not box:IsShown() then return end
+  local had = box:GetText()
+  if Hidden(had) or (had or "") ~= "" then return end   -- going back to a half-typed line isn't opening the box
+  self.replyTo, self.opening = nil, a
+  C_Timer.After(0, function()   -- after the game's own call that opened it, which says where it goes last (P:DropPick)
+    if self.opening ~= a then return end
+    self.opening = nil
+    if not box:HasFocus() then return end
     local text = box:GetText() or ""
     if type(text) ~= "string" or Hidden(text) or text ~= "" then return end
-    if a.pane.person ~= a.key or not (a.tf.frame and a.tf.frame:IsVisible()) then return end
-    local c = index and index[a.key]
+    local c = self:PickOnScreen(a)
     if c then tell(c) end
   end)
+end
+
+---The person picked in the whisper list, while their conversation is the one on screen; else nil.
+function P:PickOnScreen(a)
+  if a.pane.person ~= a.key or not (a.tf.frame and a.tf.frame:IsVisible()) then return nil end
+  return index and index[a.key]
+end
+
+---Who the next line goes to once the box is opened: the person picked, unless words are waiting in the box.
+function P:PickedPerson(box)
+  local a = self.replyTo
+  if not a then return nil end
+  local text = box:GetText()
+  if Hidden(text) or (text or "") ~= "" then return nil end
+  return self:PickOnScreen(a)
+end
+
+---Somewhere else was named for the next line: the pick no longer waits. keep: it waits for the line after.
+function P:DropPick(keep)
+  if keep then
+    self.replyTo = self.replyTo or self.opening
+  else
+    self.replyTo = nil
+  end
+  self.opening = nil
 end
 
 ---Right-click a person in the list: the game's own menu for them (whisper, invite, add friend, ignore, copy name...), as

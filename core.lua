@@ -1,5 +1,5 @@
 -- Parley: chat, rebuilt for WoW Forever. Built on Norgannon Core.
--- Plan and client findings: docs/chat-plan.md; the look: design/suite/parley.html.
+-- Plan and client findings: docs/chat-plan.md; the windows: design/suite/parley.html, their look: design/suite/parley-suite-look.html.
 --
 -- Parley draws its own windows and keeps Blizzard's chat running underneath, out of sight. Blizzard's chat box is moved
 -- into Parley's window and restyled with widget calls only: Parley never writes its fields or replaces its scripts, so
@@ -11,8 +11,9 @@ local ADDON = ...
 local Core = NorgannonCore
 
 if not (Core and Core.NewAddon) then
+  local words = Parley and Parley.L
   Parley = { disabled = true }
-  print(Parley.L and Parley.L.needsCore or "Parley needs Norgannon Core 1.28 or newer; it is turned off.")
+  print(words and words.needsCore or "Parley needs Norgannon Core 1.35 or newer; it is turned off.")
   return
 end
 
@@ -20,7 +21,7 @@ Parley = Parley or {}
 local P = Parley
 local L = P.L
 
-P.VERSION = "0.7.11"
+P.VERSION = "0.8.0"
 P.Core = Core
 P.UI = Core.UI
 P.MEDIA = "Interface\\AddOns\\Parley\\media\\"
@@ -54,7 +55,7 @@ P.DEFAULTS = {
   alpha = .8,             -- background strength (the mock-up's glass is 80%)
   fade = true,
   fadeAfter = 60,         -- seconds before old lines fade
-  fadeChrome = false,     -- fade the tab bar, pane headers, border and an idle chat box when the mouse is away
+  fadeChrome = false,     -- fade the tab bar, pane headers and an idle chat box when the mouse is away
   fadeBackground = false, -- with fadeChrome, the window's background fades too
   barPlace = "start",     -- "start" (the mock-up) or "middle" (after the time and the chat's short name)
   group = false,          -- lines from one person within two minutes run together (Maro didn't like it: off unless chosen)
@@ -202,7 +203,7 @@ end
 local function word(rest) return (rest or ""):match("^%s*(.-)%s*$") end
 
 Core:NewAddon("parley", {
-  folder = ADDON, api = { 1, 28 },
+  folder = ADDON, api = { 1, 35 },
   name = "Parley", accent = P.ACCENT_HEX, role = L.role, mark = P.MARK,
   db = "ParleyDB", defaults = P.DEFAULTS, version = 9, migrate = P.MIGRATE,
   char = "ParleyCharDB", charDefaults = P.CHAR_DEFAULTS, charVersion = 1,
