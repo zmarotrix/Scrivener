@@ -5,7 +5,7 @@
 -- the item's auction price (from Fortune, when it's installed) and a Whisper button. Chips filter by kind and dungeon,
 -- and a box filters by words.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI

@@ -1,8 +1,8 @@
--- One line of chat as Parley shows it: the time, a coloured bar for the chat, the chat's short name in tabs that mix
+-- One line of chat as Scrivener shows it: the time, a coloured bar for the chat, the chat's short name in tabs that mix
 -- chats, the person in class colour, the words. Held lines (hidden by the game in a fight) are joined with `..` into
 -- the same layout and never read: no comparing, measuring or matching touches them.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local Hidden = P.Hidden
@@ -25,7 +25,7 @@ function P.IconDrop(size)
 end
 
 -- An icon's fields after its name: height, width, x, y, then whatever follows. Left out, the width is the height, and the
--- offsets are 0. An icon its author already lowered keeps the lower of the two (Parley's own come through unchanged).
+-- offsets are 0. An icon its author already lowered keeps the lower of the two (Scrivener's own come through unchanged).
 local function lowered(body, drop)
   local f = {}
   for part in (body .. ":"):gmatch("([^:]*):") do f[#f + 1] = part end
@@ -63,7 +63,7 @@ end
 ---Wrap an icon in a link that only explains itself: hovering it shows what it means (the game shows nothing for a bare
 ---texture), clicking does nothing.
 function P.Explained(what, texture)
-  return "|Haddon:Parley:tip:" .. what .. "|h" .. texture .. "|h"
+  return "|Haddon:Scrivener:tip:" .. what .. "|h" .. texture .. "|h"
 end
 
 ---The chat's bar, the first thing on every line (3 px wide, a little shorter than the text, centred on it); hovering it
@@ -210,7 +210,7 @@ P.urls, P.urlNext = {}, 0
 local function wrapUrl(url)
   P.urlNext = P.urlNext % 500 + 1
   P.urls[P.urlNext] = url
-  return "|cff9fd0ff|Haddon:Parley:url:" .. P.urlNext .. "|h" .. url .. "|h|r"
+  return "|cff9fd0ff|Haddon:Scrivener:url:" .. P.urlNext .. "|h" .. url .. "|h|r"
 end
 
 -- A quest shared as text, the way Questie sends it ("[[47] The Captain's Chest (8551)]"), becomes the game's own quest
@@ -289,7 +289,7 @@ local SENDERLESS = { SYSTEM = true, LOOT = true, CURRENCY = true, MONEY = true, 
   COMBAT_HONOR_GAIN = true, COMBAT_FACTION_CHANGE = true, SKILL = true, COMBAT_MISC_INFO = true, TRADESKILLS = true,
   OPENING = true, CHANNEL_NOTICE = true, CHANNEL_NOTICE_USER = true, IGNORED = true, FILTERED = true, RESTRICTED = true,
   TARGETICONS = true, PET_INFO = true, BG_SYSTEM_NEUTRAL = true, BG_SYSTEM_ALLIANCE = true, BG_SYSTEM_HORDE = true,
-  ADDON = true, PARLEY = true, GAME = true, CHANNEL_LIST = true, BN_INLINE_TOAST_ALERT = true, BN_INLINE_TOAST_BROADCAST = true,
+  ADDON = true, SCRIVENER = true, GAME = true, CHANNEL_LIST = true, BN_INLINE_TOAST_ALERT = true, BN_INLINE_TOAST_BROADCAST = true,
   BN_INLINE_TOAST_BROADCAST_INFORM = true, BN_WHISPER_PLAYER_OFFLINE = true }
 local NPC = { MONSTER_SAY = true, MONSTER_YELL = true, MONSTER_EMOTE = true, MONSTER_WHISPER = true,
   MONSTER_PARTY = true, RAID_BOSS_EMOTE = true, RAID_BOSS_WHISPER = true }
@@ -311,7 +311,7 @@ P.RUNS = { SAY = true, YELL = true, GUILD = true, OFFICER = true, PARTY = true, 
   RAID_LEADER = true, INSTANCE_CHAT = true, INSTANCE_CHAT_LEADER = true, WHISPER = true, CHANNEL = true,
   GUILD_DISCORD = true, BN_WHISPER = true }
 
--- your first name, in Parley's colour, where someone says it (not inside links or coloured text)
+-- your first name, in Scrivener's colour, where someone says it (not inside links or coloured text)
 local mePattern, meFor
 local function highlightMe(msg)
   local me = P.Core.Names.First(P.Me())
@@ -428,10 +428,10 @@ function P:Format(r, tab, cont)
   if r.count and r.count > 1 then tail = " " .. P.FoldPill(r.count) end
   if r.why and tab and tab.special == "foryou" then tail = tail .. " " .. WHY .. "\194\183 " .. r.why .. "|r" end
   if r.why and tab and tab.special ~= "foryou" and r.kind ~= "WHISPER" then
-    cr, cg, cb = P.KindColor("FORYOU")   -- the bar turns Parley's colour when a line is for you
+    cr, cg, cb = P.KindColor("FORYOU")   -- the bar turns Scrivener's colour when a line is for you
   end
   if r.jumped then
-    -- the line a search result jumped to: Parley's colour for a few seconds, the bar and the words
+    -- the line a search result jumped to: Scrivener's colour for a few seconds, the bar and the words
     cr, cg, cb = P.KindColor("FORYOU")
     lr, lg, lb = cr, cg, cb
   end

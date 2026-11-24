@@ -1,6 +1,6 @@
 -- History: chat survives reloads and logouts.
--- Each character's history is its own, in its own file (ParleyCharDB, 0.7.6): that's the real one, and all this character
--- ever writes. The account's file holds a copy of each (ParleyDB.histories, by GUID), because the game lets a character
+-- Each character's history is its own, in its own file (ScrivenerCharDB, 0.7.6): that's the real one, and all this character
+-- ever writes. The account's file holds a copy of each (ScrivenerDB.histories, by GUID), because the game lets a character
 -- read only its own file and the account's. The setting "Share history between characters" (on unless you turn it off)
 -- only picks which of them show, so switching moves nothing and loses nothing. The copy is the same tables, so the game
 -- saves both with no keeping in step, and a character's lines join the others' once it has logged in with 0.8.1.
@@ -12,7 +12,7 @@
 -- are lines the game hid until they're read again after the fight.
 -- Each saved line is { time, chat type, sender, text, channel number, why, kind }.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 
 local CAPS = { WHISPER = 5000, GUILD = 3000, OFFICER = 1500, PARTY = 1500, RAID = 1500, INSTANCE = 1000, FORYOU = 1000 }
@@ -232,12 +232,12 @@ end
 ---Ask first: it can't be undone. It clears what it asked about, whatever the switch says by the time of the answer.
 function P:AskClearHistory()
   local S, all = P.L.set, self.db.shareHistory and true or false
-  StaticPopupDialogs["PARLEY_CLEAR_HISTORY"] = {
+  StaticPopupDialogs["SCRIVENER_CLEAR_HISTORY"] = {
     text = all and S.clearAskAll or S.clearAskOwn,
     button1 = YES, button2 = NO, timeout = 0, whileDead = true, hideOnEscape = true,
     OnAccept = function() P:ClearHistory(all) end,
   }
-  StaticPopup_Show("PARLEY_CLEAR_HISTORY")
+  StaticPopup_Show("SCRIVENER_CLEAR_HISTORY")
 end
 
 -- every character's history was cleared since this one last logged in: its older lines go now

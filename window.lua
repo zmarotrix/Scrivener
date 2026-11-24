@@ -4,7 +4,7 @@
 -- own widget, which can show hidden lines and edit lines already shown. Drag a tab onto another window's tab bar to move
 -- it, onto a window's lines to show it beside them, or onto empty screen for a new window.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI
@@ -20,7 +20,7 @@ local RULE_Y = BAR_H + 2        -- where the rule under the tab bar sits, from t
 local HEAD_H = 22               -- a pane's header: its name and the chats in it
 P.COMPOSE_H = 30                -- the chat box at the bottom of the docked window
 local MAX_PANES = 3
-local MARK = 20                 -- Parley's mark at the left of the tab bar
+local MARK = 20                 -- Scrivener's mark at the left of the tab bar
 
 ---A dashed outline around a frame (arrange mode): white dashes (media/dash-*.tga) repeated along each
 ---edge and tinted. :SetColor(c, alpha), :SetShown(on).
@@ -126,7 +126,7 @@ end
 -- The font
 -------------------------------------------------------------------------------------------
 
--- The fonts Parley offers: the suite's, the game's own, and every font SharedMedia knows when it's installed.
+-- The fonts Scrivener offers: the suite's, the game's own, and every font SharedMedia knows when it's installed.
 local GAME_FONTS = { friz = "Fonts\\FRIZQT__.TTF", arialn = "Fonts\\ARIALN.TTF", morpheus = "Fonts\\MORPHEUS.TTF",
   skurri = "Fonts\\SKURRI.TTF" }
 P.FONT_ORDER = { "suite", "suiteBold", "marcellus", "game", "friz", "arialn", "morpheus", "skurri" }
@@ -208,7 +208,7 @@ end
 ---A window's font: shared unless the window has a text size of its own.
 function P:FontFor(win)
   if not (win and win.data and win.data.font) then return self.font end
-  win.font = win.font or CreateFont("ParleyChatFont" .. win.index)
+  win.font = win.font or CreateFont("ScrivenerChatFont" .. win.index)
   setupFont(win.font, win.data.font)
   return win.font
 end
@@ -219,7 +219,7 @@ end
 function P.SetPaneFont(smf, font)
   if smf:GetFontObject() == font then
     if not P.blankFont then
-      P.blankFont = CreateFont("ParleyBlankFont")
+      P.blankFont = CreateFont("ScrivenerBlankFont")
       P.blankFont:SetFont(UI.FONT_FILES.body, 12, "")
     end
     smf:SetFontObject(P.blankFont)
@@ -228,7 +228,7 @@ function P.SetPaneFont(smf, font)
 end
 
 function P:ApplyFont()
-  self.font = self.font or CreateFont("ParleyChatFont")
+  self.font = self.font or CreateFont("ScrivenerChatFont")
   setupFont(self.font, self.db.font)
   for _, tf in pairs(self.tabFrames) do P.SetPaneFont(tf.smf, self:FontFor(tf.win)) end
   -- a run-together line leaves the time's room empty: as many spaces as the time and its gap are wide
@@ -250,7 +250,7 @@ end
 -------------------------------------------------------------------------------------------
 
 local RUN = 120   -- seconds: lines from the same person within this run together
-local NEW_ID = "parley:new"   -- the "New since you looked" divider's id in a message frame
+local NEW_ID = "scrivener:new"   -- the "New since you looked" divider's id in a message frame
 
 -- the extra data of a message frame's entry, whichever way the client hands it over (unpacked, or the entry itself)
 local function entryId(a, _, _, _, id)
@@ -275,7 +275,7 @@ local function markNew(tab, tf)
 end
 
 local function addLine(tab, tf, r, live)
-  if live and tf.unread == 0 and r.kind ~= "ADDONS" and r.type ~= "PARLEY" and away(tf) then markNew(tab, tf) end
+  if live and tf.unread == 0 and r.kind ~= "ADDONS" and r.type ~= "SCRIVENER" and away(tf) then markNew(tab, tf) end
   local last, cont = tf.last, nil
   if P.db.group and last and P.RUNS[r.type] and not r.held and not r.why and type(r.who) == "string" and last.who == r.who
       and last.kind == r.kind and last.type == r.type and (r.t or 0) - (last.t or 0) <= RUN
@@ -298,7 +298,7 @@ local function addLine(tab, tf, r, live)
   if not live then return end
   local win = tf.win
   if win and away(tf) then
-    if r.kind ~= "ADDONS" and r.type ~= "PARLEY" then tf.unread = tf.unread + 1; P:UpdateTabs(win) end
+    if r.kind ~= "ADDONS" and r.type ~= "SCRIVENER" then tf.unread = tf.unread + 1; P:UpdateTabs(win) end
   elseif win and tf.smf:GetScrollOffset() > 0 then
     tf.newCount = tf.newCount + 1
     win.pill.text:SetText(L.newLines:format(tf.newCount))
@@ -537,7 +537,7 @@ local function newMessageFrame(tab)
 end
 P.NewPaneFrame = newMessageFrame
 
----The game's chat keys (Chat Page Up, Chat Page Down, Chat Bottom in its key bindings) scroll Parley's pane: the one under
+---The game's chat keys (Chat Page Up, Chat Page Down, Chat Bottom in its key bindings) scroll Scrivener's pane: the one under
 ---the mouse, or else the first pane of the window with the chat box. how: "PageUp", "PageDown" or "ScrollToBottom".
 function P:ScrollShown(how)
   local pick
@@ -562,7 +562,7 @@ local TIP_LINKS = { item = true, spell = true, enchant = true, quest = true, ach
 
 function P:LinkTip(owner, link)
   if Hidden(link) or type(link) ~= "string" then return end
-  local tip = link:match("^addon:Parley:tip:(.+)$")
+  local tip = link:match("^addon:Scrivener:tip:(.+)$")
   if tip then
     local kind = tip:match("^kind:(.+)$")
     local text, sub, from
@@ -590,13 +590,13 @@ end
 
 -- A name's right-click menu is the game's own (whisper, invite, ignore, report, copy name...). The game opens it owned by
 -- the chat frame the click came from and closes it the moment that frame isn't visible; the game's frame is hidden in
--- Parley's vault, so the menu was gone before it drew. Here it's owned by the pane that was clicked, and keeps the game's
--- chat frame for what it does (Whisper uses the chat box Parley moved in). The same contextData the game builds in
+-- Scrivener's vault, so the menu was gone before it drew. Here it's owned by the pane that was clicked, and keeps the game's
+-- chat frame for what it does (Whisper uses the chat box Scrivener moved in). The same contextData the game builds in
 -- FriendsFrame_ShowDropdown / FriendsFrame_ShowBNDropdown, with only the owner changed.
 --
 -- One entry needs help. The game's "Copy Character Name" copies with CopyToClipboard, which only the game itself may
 -- call, so from a menu an add-on opened it fails (ADDON_ACTION_FORBIDDEN). The game hides its Target entry there for
--- the same reason (it checks issecure()), but not this one. In the menus Parley opens, that entry opens Parley's copy
+-- the same reason (it checks issecure()), but not this one. In the menus Scrivener opens, that entry opens Scrivener's copy
 -- box instead, with the name selected. The game's own menus are left as they are.
 local function findEntry(root, text, depth)
   if depth > 3 or not (root and root.EnumerateElementDescriptions) then return end
@@ -613,7 +613,7 @@ local function hookCopyName()
   if copyHooked or not (Menu and Menu.ModifyMenu and MenuUtil and type(COPY_CHARACTER_NAME) == "string") then return end
   copyHooked = true
   Menu.ModifyMenu("MENU_UNIT_FRIEND", function(_, root, data)
-    if data == nil or data ~= P.nameMenuData then return end   -- not a menu Parley opened
+    if data == nil or data ~= P.nameMenuData then return end   -- not a menu Scrivener opened
     pcall(function()
       local entry = findEntry(root, COPY_CHARACTER_NAME, 1)
       if entry and entry.SetResponder then
@@ -632,7 +632,7 @@ local function openNameMenu(which, data, owner)
   return (pcall(UnitPopup_OpenMenu, which, data))
 end
 
----Parley's "Copy Character Name": the copy box with the name selected. It's the name a whisper reaches ("First Last"),
+---Scrivener's "Copy Character Name": the copy box with the name selected. It's the name a whisper reaches ("First Last"),
 ---even when the menu only knew a first name (a whisper to a first name alone fails).
 function P:CopyName(name)
   if type(name) ~= "string" or Hidden(name) or name == "" then return false end
@@ -674,7 +674,7 @@ function P:NameMenu(name, owner, bnID)
   return openNameMenu("FRIEND", { name = name, chatTarget = name }, owner)
 end
 
----"Move to whisper window" on that menu makes one of the game's whisper windows, which Parley keeps out of sight; Parley's
+---"Move to whisper window" on that menu makes one of the game's whisper windows, which Scrivener keeps out of sight; Scrivener'
 ---own is the person's conversation, so it opens that.
 function P:MovedToWhisperWindow(chatType, target)
   local m = self.menuFor
@@ -695,7 +695,7 @@ function P:ClickLink(link, text, button, owner)
     end
     return
   end
-  local rest = link:match("^addon:Parley:(.*)$")
+  local rest = link:match("^addon:Scrivener:(.*)$")
   if rest then
     local what, arg = rest:match("^(%a+):?(.*)$")
     if what == "url" then
@@ -723,7 +723,7 @@ end
 local ask
 function P:AskText(title, text, onAccept, note)
   if not ask then
-    ask = CreateFrame("Frame", "ParleyAskFrame", UIParent)
+    ask = CreateFrame("Frame", "ScrivenerAskFrame", UIParent)
     ask:SetSize(380, 96)
     ask:SetPoint("CENTER", 0, 140)
     ask:SetFrameStrata("DIALOG")
@@ -753,7 +753,7 @@ function P:AskText(title, text, onAccept, note)
       if not (IsControlKeyDown() or (IsMetaKeyDown and IsMetaKeyDown())) then return end
       C_Timer.After(0, function() if not ask.onAccept then ask:Hide() end end)
     end)
-    tinsert(UISpecialFrames, "ParleyAskFrame")
+    tinsert(UISpecialFrames, "ScrivenerAskFrame")
     ask:Hide()   -- so its first opening fades in too
   end
   ask.title:SetText(title)
@@ -1101,7 +1101,7 @@ end
 
 local function createWindow(index)
   local win = { index = index, buttons = {} }
-  local f = CreateFrame("Frame", "ParleyWindow" .. index, UIParent)
+  local f = CreateFrame("Frame", "ScrivenerWindow" .. index, UIParent)
   win.frame = f
   f:SetFrameStrata("LOW")
   f:SetClampedToScreen(true)
@@ -1129,7 +1129,7 @@ local function createWindow(index)
   bar:SetScript("OnDragStart", function() if not P.db.locked then P:BeginMove(win) end end)
   bar:SetScript("OnDragStop", function() P:EndMove(win) end)
 
-  -- Parley's mark, on the window with the chat box (UpdateTabs): the window's menu, and a place to drag it by
+  -- Scrivener's mark, on the window with the chat box (UpdateTabs): the window's menu, and a place to drag it by
   win.mark = CreateFrame("Button", nil, bar)
   win.mark:SetSize(MARK, MARK)
   win.mark:SetPoint("LEFT", 0, 0)

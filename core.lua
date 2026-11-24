@@ -1,34 +1,34 @@
--- Parley: chat, rebuilt for WoW Forever. Built on Norgannon Core.
+-- Scrivener: chat, rebuilt for WoW Forever. Built on Norgannon Core.
 -- Plan and client findings: docs/chat-plan.md; the windows: design/suite/parley.html, their look: design/suite/parley-suite-look.html.
 --
--- Parley draws its own windows and keeps Blizzard's chat running underneath, out of sight. Blizzard's chat box is moved
--- into Parley's window and restyled with widget calls only: Parley never writes its fields or replaces its scripts, so
+-- Scrivener draws its own windows and keeps Blizzard's chat running underneath, out of sight. Blizzard's chat box is moved
+-- into Scrivener's window and restyled with widget calls only: Scrivener never writes its fields or replaces its scripts, so
 -- /cast and the other protected commands typed into it keep working. In dungeon fights the game hides what chat lines
--- say from add-ons; Parley shows them as they arrive (joined with .., never read), then reads them again by line id
+-- say from add-ons; Scrivener shows them as they arrive (joined with .., never read), then reads them again by line id
 -- when the fight ends.
 
 local ADDON = ...
 local Core = NorgannonCore
 
 if not (Core and Core.NewAddon) then
-  local words = Parley and Parley.L
-  Parley = { disabled = true }
-  print(words and words.needsCore or "Parley needs Norgannon Core 1.35 or newer; it is turned off.")
+  local words = Scrivener and Scrivener.L
+  Scrivener = { disabled = true }
+  print(words and words.needsCore or "Scrivener needs Norgannon Core 1.35 or newer; it is turned off.")
   return
 end
 
-Parley = Parley or {}
-local P = Parley
+Scrivener = Scrivener or {}
+local P = Scrivener
 local L = P.L
 
-P.VERSION = "0.8.2"
+P.VERSION = "0.9.0"
 P.Core = Core
 P.UI = Core.UI
-P.MEDIA = "Interface\\AddOns\\Parley\\media\\"
-P.MARK = P.MEDIA .. "parley"            -- two voices, built like every suite mark (docs/chat-plan.md section 12)
+P.MEDIA = "Interface\\AddOns\\Scrivener\\media\\"
+P.MARK = P.MEDIA .. "scrivener"            -- two voices, built like every suite mark (docs/chat-plan.md section 12)
 P.ACCENT_HEX = "9aa6ff"
 
----A Core widget in Parley's colour. The Core colours a widget from the suite window it sits in; Parley's own frames
+---A Core widget in Scrivener's colour. The Core colours a widget from the suite window it sits in; Scrivener's own frames
 ---aren't suite windows, so without this its switches, buttons, fields and scrollbars come out in the suite's gold.
 function P.Own(widget)
   local accent = P.UI.Hex(P.ACCENT_HEX)
@@ -44,7 +44,7 @@ end
 -------------------------------------------------------------------------------------------
 
 P.DEFAULTS = {
-  takeover = true,        -- Parley's windows instead of the game's (false: the game's chat, untouched)
+  takeover = true,        -- Scrivener's windows instead of the game's (false: the game's chat, untouched)
   layout = false,         -- the layout picked on first run; false until one is
   windows = {},           -- { x, y, w, h, active, tabs = { { name, kinds = { [key] = true }, all, special } } }
   locked = false,
@@ -81,7 +81,7 @@ P.DEFAULTS = {
   alerts = {},            -- { text, where = "public" | "all", when = "always" | "solo" | "cities" | "outside", on,
                           --   outs = { toast, sound, flash } (0.6.0; older alerts follow the For you settings) }
   keepDays = 30,
-  seen = {},              -- [kind key] = true for every chat and channel Parley has seen a line in (for pickers)
+  seen = {},              -- [kind key] = true for every chat and channel Scrivener has seen a line in (for pickers)
   chanNames = {},         -- [channel key] = the channel's own name, as last seen
 }
 
@@ -165,7 +165,7 @@ local Hidden = P.Hidden
 P.diag = { lines = 0, held = 0, heldShown = 0, heldRefused = 0, reread = 0, rereadHidden = 0, rereadGone = 0,
   copies = 0, lockdowns = 0, errors = 0, lastError = nil, box = false }
 
----Run fn and keep going if it fails; the error is counted for /parley check.
+---Run fn and keep going if it fails; the error is counted for /scrivener check.
 function P.Safe(fn, ...)
   local ok, err = pcall(fn, ...)
   if not ok then
@@ -205,12 +205,12 @@ end
 
 local function word(rest) return (rest or ""):match("^%s*(.-)%s*$") end
 
-Core:NewAddon("parley", {
+Core:NewAddon("scrivener", {
   folder = ADDON, api = { 1, 35 },
-  name = "Parley", accent = P.ACCENT_HEX, role = L.role, mark = P.MARK,
-  db = "ParleyDB", defaults = P.DEFAULTS, version = 9, migrate = P.MIGRATE,
-  char = "ParleyCharDB", charDefaults = P.CHAR_DEFAULTS, charVersion = 1,
-  slash = { "/parley" },
+  name = "Scrivener", accent = P.ACCENT_HEX, role = L.role, mark = P.MARK,
+  db = "ScrivenerDB", defaults = P.DEFAULTS, version = 9, migrate = P.MIGRATE,
+  char = "ScrivenerCharDB", charDefaults = P.CHAR_DEFAULTS, charVersion = 1,
+  slash = { "/scrivener", "/parley" },
   commands = {
     arrange = { function() if P.SetArranging then P:SetArranging(not P.arranging) end end, L.cmd.arrange },
     new = { function() if P.NewWindow then P:NewWindow() end end, L.cmd.new },
@@ -244,7 +244,7 @@ if P.disabled then return end
 -- yours included once you've said anything). Another character leaves it be and starts its own. Runs before anything
 -- reads history.
 -- It's copied, and the account's copy goes only at a later login that finds the character's save holding the copy: the
--- game saves ParleyCharDB only once it has been restarted with 0.7.6's TOC, and a /reload before that would otherwise
+-- game saves ScrivenerCharDB only once it has been restarted with 0.7.6's TOC, and a /reload before that would otherwise
 -- lose it.
 local function mergeOldest(a, b)   -- two lists, each oldest first, into one (lines from the same second keep their order)
   local out, i, j = {}, 1, 1
@@ -299,8 +299,8 @@ function P:PrintCheck()
   if d.lastError then self:Print(C.lastError:format(d.lastError)) end
 end
 
--- Other chat add-ons fight over the chat box; say so once rather than quietly breaking.
-local OTHERS = { "Prat-3.0", "Chattynator", "Chatter", "Glass", "ElvUI" }
+-- Other chat add-ons (Parley is what Scrivener was called up to 0.8.2) fight over the chat box; say so once rather than quietly breaking.
+local OTHERS = { "Parley", "Prat-3.0", "Chattynator", "Chatter", "Glass", "ElvUI" }
 P:OnReady(function()
   if not P.db.takeover then return end
   local loaded = C_AddOns and C_AddOns.IsAddOnLoaded or rawget(_G, "IsAddOnLoaded")

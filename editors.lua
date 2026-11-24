@@ -3,7 +3,7 @@
 -- each channel and chat, and the command each short name makes. Alerts: a box to type a phrase or Shift-click an item
 -- into, then one row per alert with its switch, what it watches, where and when, and how it tells you.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI
@@ -183,7 +183,7 @@ local function channelRow(i)
 end
 
 local function buildNames()
-  names = panel("ParleyChannelNames", L.namesTitle)
+  names = panel("ScrivenerChannelNames", L.namesTitle)
   names.sub = sub(names, L.namesSub)
   names.sub:SetPoint("TOPLEFT", 14, -TOP)
   names.sub:SetPoint("RIGHT", -14, 0)
@@ -442,7 +442,7 @@ local function alertRow(i)
 end
 
 local function buildAlerts()
-  alerts = panel("ParleyAlerts", L.alertsTitle)
+  alerts = panel("ScrivenerAlerts", L.alertsTitle)
   alerts.all = UI.Toggle(alerts, function(on) P.db.paused = not on end)
   if alerts.all.ApplyAccent then alerts.all:ApplyAccent(ACCENT) end
   alerts.all:SetPoint("RIGHT", alerts.close, "LEFT", -10, 0)
@@ -530,7 +530,7 @@ function P:RefreshAlertsEditor()
 end
 
 -------------------------------------------------------------------------------------------
--- Shift-clicking an item while one of Parley's boxes has focus puts the link there
+-- Shift-clicking an item while one of Scrivener's boxes has focus puts the link there
 -------------------------------------------------------------------------------------------
 
 local function ourFocus()

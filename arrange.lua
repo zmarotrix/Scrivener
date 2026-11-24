@@ -3,7 +3,7 @@
 -- snapped to. Arrange mode outlines every window, puts a handle on each corner for resizing, and shows a bar at the
 -- top of the screen: Snap on or off, Lock all, Done.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI
@@ -170,7 +170,7 @@ end
 local bar
 local function arrangeBar()
   if bar then return bar end
-  bar = CreateFrame("Frame", "ParleyArrangeBar", UIParent)
+  bar = CreateFrame("Frame", "ScrivenerArrangeBar", UIParent)
   bar:SetFrameStrata("DIALOG")
   bar:SetHeight(34)
   bar:SetPoint("TOP", 0, -18)

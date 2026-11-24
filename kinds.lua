@@ -1,9 +1,9 @@
--- The kinds of chat a tab can mix, their colours and short names, and the channels Parley has seen.
+-- The kinds of chat a tab can mix, their colours and short names, and the channels Scrivener has seen.
 -- A kind is a chat (GUILD, WHISPER, LOOT...) or one channel ("#lookingforgroup"). Channels are keyed by their own name,
 -- not their number, so a channel that moves from 5 to 6 keeps its short name, and zone channels (General - Elwynn
 -- Forest) share one key for every zone.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 
@@ -150,12 +150,12 @@ end
 -------------------------------------------------------------------------------------------
 
 local used           -- [ "/x" ] = true for every slash command the game and add-ons have, built once
-local mine = {}      -- [ "/x" ] = channel key, for Parley's own
+local mine = {}      -- [ "/x" ] = channel key, for Scrivener's own
 
 local function buildUsed()
   used = {}
   for k, v in pairs(_G) do
-    if type(k) == "string" and type(v) == "string" and k:sub(1, 6) == "SLASH_" and k:sub(1, 14) ~= "SLASH_PARLEYCH" then
+    if type(k) == "string" and type(v) == "string" and k:sub(1, 6) == "SLASH_" and k:sub(1, 17) ~= "SLASH_SCRIVENERCH" then
       used[v:lower()] = true
     end
   end
@@ -189,7 +189,7 @@ function P:RegisterChannelCommand(key, quiet)
     if not quiet then self:Print(P.L.commandTaken:format(cmd:sub(2))) end
     return "taken"
   end
-  local id = "PARLEYCH" .. cmd:sub(2):upper()
+  local id = "SCRIVENERCH" .. cmd:sub(2):upper()
   _G["SLASH_" .. id .. "1"] = cmd
   SlashCmdList[id] = function(msg) send(key, msg) end
   mine[cmd] = key
@@ -209,7 +209,7 @@ P:OnReady(function()
     for key in pairs(P.db.chanNames) do P:RegisterChannelCommand(key, true) end
   end)
   for _, event in ipairs({ "CHANNEL_UI_UPDATE", "CHAT_MSG_CHANNEL_NOTICE" }) do
-    P.Core:On(event, "parley.channels", function()
+    P.Core:On(event, "scrivener.channels", function()
       P:ScanChannels()
       for key in pairs(P.db.chanNames) do P:RegisterChannelCommand(key, true) end
     end)

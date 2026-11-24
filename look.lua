@@ -1,11 +1,11 @@
--- How Parley's frames look: Norgannon Core's windows, made for something that's always on screen (the mock-up:
+-- How Scrivener's frames look: Norgannon Core's windows, made for something that's always on screen (the mock-up:
 -- design/suite/parley-suite-look.html). A chat window wants the suite's materials without its tall header: a rounded
 -- panel, a soft shadow, the accent washing over its top and the light along its edge, on a back you can see through.
 -- The pop-ups are the suite window's own recipe.
 -- The lines keep a back as dark as ever: the suite's lighter stone, see-through over snow, took a yell's contrast from
 -- 3.8:1 to 3.0:1. So the accent stays on the tab bar, above the first line.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local UI = P.UI
 local C = UI.C
@@ -96,7 +96,7 @@ function P.Panel(f, washFade, washAlpha)
   return f
 end
 
----A pop-up's title in Parley's colour, with the suite's fading line under it, `at` px from the top.
+---A pop-up's title in Scrivener's colour, with the suite's fading line under it, `at` px from the top.
 function P.PanelTitle(f, text, size, x, y, at)
   f.title = UI.Text(f, "title", size, P.ACCENT_TEXT)
   f.title:SetPoint("TOPLEFT", x, y)
@@ -129,7 +129,7 @@ function P.Card(b)
 end
 
 -------------------------------------------------------------------------------------------
--- Pills and fields of Parley's own, drawn as the Core's controls
+-- Pills and fields of Scrivener's own, drawn as the Core's controls
 -------------------------------------------------------------------------------------------
 
 ---A raised pill you press (the chat box's chip and its menu pill): :Raise(hover, strong). strong is a deep accent. Its
@@ -160,7 +160,7 @@ function P.SwitchPill(b)
   return b
 end
 
----A recessed text field around one of Parley's own edit boxes, as UI.Input: :Light(on) glows in Parley's colour.
+---A recessed text field around one of Scrivener's own edit boxes, as UI.Input: :Light(on) glows in Scrivener's colour.
 function P.FieldLook(f)
   f.field = UI.Field(f, "BACKGROUND", 0)
   function f:Light(on)

@@ -1,9 +1,9 @@
--- The combat log: the game's own, in a Parley pane.
+-- The combat log: the game's own, in a Scrivener pane.
 -- The game's chat windows are out of sight (takeover.lua), and its combat log is one of them. A Combat log tab gives it
--- back, filter bar and all, inside Parley's window: its filters, colours and settings stay the game's (right-click the
--- filter bar). Parley only moves and shows it, with widget calls and HookScript; it never writes the game's fields.
+-- back, filter bar and all, inside Scrivener's window: its filters, colours and settings stay the game's (right-click the
+-- filter bar). Scrivener only moves and shows it, with widget calls and HookScript; it never writes the game's fields.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 
 local host   -- the pane holding the combat log (its tf), while one does
@@ -13,10 +13,10 @@ local function frames()
   return rawget(_G, "COMBATLOG"), rawget(_G, "CombatLogQuickButtonFrame_Custom")
 end
 
--- the log's own side buttons and resize grip would stick out of the pane; they stay hidden while Parley holds it
+-- the log's own side buttons and resize grip would stick out of the pane; they stay hidden while Scrivener holds it
 local function keepHidden(frame)
-  if not frame or frame.parleyHidden then return end
-  frame.parleyHidden = true
+  if not frame or frame.scrivenerHidden then return end
+  frame.scrivenerHidden = true
   frame:HookScript("OnShow", function(self) if host then self:Hide() end end)
   frame:Hide()
 end
@@ -52,7 +52,7 @@ local function place()
 end
 P.PlaceCombatLog = place
 
----A Combat log pane: its own lines are the game's log, so Parley's line frame steps aside.
+---A Combat log pane: its own lines are the game's log, so Scrivener's line frame steps aside.
 function P:HostCombatLog(pane, tf)
   tf.pane = pane
   tf.hosting = true

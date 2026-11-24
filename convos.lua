@@ -5,7 +5,7 @@
 -- you looked" marks where you'd got to. Picking a person readies the chat box to whisper them without opening it;
 -- right-clicking one gives the game's menu for them, as their name in chat does.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI
@@ -49,7 +49,7 @@ end
 
 -------------------------------------------------------------------------------------------
 -- Level and guild, learned from what the game shows anyway: people you target or mouse over, your group, friendly
--- nameplates, and any /who (yours or another add-on's). Parley never asks the server. Kept for the people you've
+-- nameplates, and any /who (yours or another add-on's). Scrivener never asks the server. Kept for the people you've
 -- whispered with; everyone else only for this session, in case they whisper you later.
 -------------------------------------------------------------------------------------------
 
@@ -96,7 +96,7 @@ P.LearnPerson = learn
 
 local function note(r)
   local key = P.ConvoKey(r)
-  if not key or r.type == "PARLEY" then return nil end
+  if not key or r.type == "SCRIVENER" then return nil end
   local c = index[key]
   if not c then
     c = { key = key, name = r.bn and r.who or (Core.Names.Full(r.who) or r.who), last = 0, unread = 0 }
@@ -153,7 +153,7 @@ function P:ConvosChanged()
   if self.replyTo and not index[self.replyTo.key] then self.replyTo = nil end
 end
 
----What Parley has seen of someone: this character, this session, then the other histories on show.
+---What Scrivener has seen of someone: this character, this session, then the other histories on show.
 local function seenOf(key)
   local e = P.char.personInfo[key] or sighted[key]
   if e or not P.db.shareHistory then return e end
@@ -196,7 +196,7 @@ local function readRoster()
 end
 
 ---{ online = true/false/nil, level, class, zone, guild } for a person: the friends list, then the guild roster, then what
----Parley has seen of them, then their GUID.
+---Scrivener has seen of them, then their GUID.
 function P:PersonInfo(name, guid)
   local info = {}
   local key = name:lower()
@@ -271,7 +271,7 @@ local function colorName(c)
   return hex and ("|c" .. hex .. shown .. "|r") or shown
 end
 
----A person's name in the list, then, faint, their level and guild when Parley knows them: "Ash Morrow  58 <Wardens of
+---A person's name in the list, then, faint, their level and guild when Scrivener knows them: "Ash Morrow  58 <Wardens of
 ---Dawn>". Also whether they're online (true, false, or nil when nobody can say).
 function P.ConvoRowName(c)
   local _, online, i = infoLine(c)
@@ -539,21 +539,21 @@ end
 
 P:OnReady(function()
   if not P.db.takeover then return end
-  Core:On("GUILD_ROSTER_UPDATE", "parley.convos", function()
+  Core:On("GUILD_ROSTER_UPDATE", "scrivener.convos", function()
     readRoster()
     for pane, tf in pairs(P.tabFrames) do if tf.rail then P:RefreshRail(pane, tf) end end
   end)
-  Core:On("FRIENDLIST_UPDATE", "parley.convos", function()
+  Core:On("FRIENDLIST_UPDATE", "scrivener.convos", function()
     for pane, tf in pairs(P.tabFrames) do if tf.rail then P:RefreshRail(pane, tf) end end
   end)
   -- level and guild from the people the game shows you
-  Core:On("PLAYER_TARGET_CHANGED", "parley.convos", function() fromUnit("target") end)
-  Core:On("PLAYER_FOCUS_CHANGED", "parley.convos", function() fromUnit("focus") end)
-  Core:On("UPDATE_MOUSEOVER_UNIT", "parley.convos", function() fromUnit("mouseover") end)
-  Core:On("NAME_PLATE_UNIT_ADDED", "parley.convos", function(_, unit) if type(unit) == "string" then fromUnit(unit) end end)
-  Core:On("GROUP_ROSTER_UPDATE", "parley.convos", function()
+  Core:On("PLAYER_TARGET_CHANGED", "scrivener.convos", function() fromUnit("target") end)
+  Core:On("PLAYER_FOCUS_CHANGED", "scrivener.convos", function() fromUnit("focus") end)
+  Core:On("UPDATE_MOUSEOVER_UNIT", "scrivener.convos", function() fromUnit("mouseover") end)
+  Core:On("NAME_PLATE_UNIT_ADDED", "scrivener.convos", function(_, unit) if type(unit) == "string" then fromUnit(unit) end end)
+  Core:On("GROUP_ROSTER_UPDATE", "scrivener.convos", function()
     local raid = IsInRaid and IsInRaid()
     for i = 1, raid and GetNumGroupMembers() or 4 do fromUnit((raid and "raid" or "party") .. i) end
   end)
-  Core:On("WHO_LIST_UPDATE", "parley.convos", fromWho)
+  Core:On("WHO_LIST_UPDATE", "scrivener.convos", fromWho)
 end)

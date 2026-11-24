@@ -5,10 +5,10 @@
 </p>
 
 > [!WARNING]
-> **Parley is in beta.** Expect bugs and changes between versions. If chat misbehaves, `/parley off` gives you the game's
+> **Scrivener is in beta.** Expect bugs and changes between versions. If chat misbehaves, `/scrivener off` gives you the game's
 > own chat back.
 
-**Parley is chat, rebuilt for WoW Forever.** Windows you arrange in seconds, short lines you read at a glance, alerts
+**Scrivener is chat, rebuilt for WoW Forever.** Windows you arrange in seconds, short lines you read at a glance, alerts
 for the lines that matter to you, and chat that keeps working in dungeon fights.
 
 ## What it does
@@ -46,7 +46,7 @@ in cities, outside instances or when you're not in a group, and each tells you i
 taskbar.
 
 ### Dungeon fights
-WoW Forever hides what chat lines say from add-ons during dungeon fights. Parley still shows every line as it arrives,
+WoW Forever hides what chat lines say from add-ons during dungeon fights. Scrivener still shows every line as it arrives,
 like any other line. When the fight ends it reads them again, so names get their class colours, whispers join their
 conversations, your name and alerts are checked, and the lines are kept in history.
 
@@ -57,21 +57,21 @@ what was said on the others, unless you turn that off in Settings; then each sho
 own either way, so switching loses nothing. Search looks through all of it as you type, and Jump shows a result where it was said.
 
 ### The chat box
-The game's own chat box, moved into Parley's window and restyled. Parley never rewrites it, so `/cast`, `/target` and
-macros typed into it keep working in combat. A whisper to a first name fails on Forever; Parley offers the full name
+The game's own chat box, moved into Scrivener's window and restyled. Scrivener never rewrites it, so `/cast`, `/target` and
+macros typed into it keep working in combat. A whisper to a first name fails on Forever; Scrivener offers the full name
 and a one-click **Send again**. The pill at its right end is the game's chat menu: emotes, voice emotes and, on a
 character with more than one, your languages.
 
 ### Everything the game's chat window did
 The game's combat log, filters and all, as a Combat log tab. Battle.net whispers as conversations. Chat colours: click
 a colour in Channel names. Joining and leaving channels: the game's own channel list, from the window menu. The game's
-chat keys (Chat Page Up, Page Down, Bottom) scroll Parley, the time follows the game's 12-hour or seconds option, and
+chat keys (Chat Page Up, Page Down, Bottom) scroll Scrivener, the time follows the game's 12-hour or seconds option, and
 lines the game prints itself (the guild's message of the day, level-ups, /played) go to their own chat.
 
 ## Commands
 
-`/parley` opens the settings. `/parley layout`, `/parley new`, `/parley arrange`, `/parley alert <words or item>`,
-`/parley alerts`, `/parley names`, `/parley find <words>`, `/parley check`, `/parley off`, `/parley on`.
+`/scrivener` opens the settings. `/scrivener layout`, `/scrivener new`, `/scrivener arrange`, `/scrivener alert <words or item>`,
+`/scrivener alerts`, `/scrivener names`, `/scrivener find <words>`, `/scrivener check`, `/scrivener off`, `/scrivener on`.
 
 ## Needs
 

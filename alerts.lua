@@ -2,7 +2,7 @@
 -- out of sight. Alerts are compiled once into patterns and item ids, so a busy Trade channel costs a few finds per line.
 -- Only plain lines are matched; held lines are matched when they're read again after the fight.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI

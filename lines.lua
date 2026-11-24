@@ -1,9 +1,9 @@
 -- The router: every chat event becomes one small record, handed to the tabs that want it.
 -- Plain lines get everything (mentions, alerts, folding, history). Held lines (the game hides their words and sender in
--- dungeon fights) are shown as they arrive and kept by line id; when chat comes back, Parley reads them again with
+-- dungeon fights) are shown as they arrive and kept by line id; when chat comes back, Scrivener reads them again with
 -- C_ChatInfo.GetChatLineText and friends and swaps each for a full line in place.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local Core = P.Core
@@ -45,9 +45,9 @@ function P:Deliver(r)
   if self.Show then self:Show(r) end
 end
 
----A line of Parley's own ("Send again"): shown in the System chat and wherever asked.
+---A line of Scrivener's own ("Send again"): shown in the System chat and wherever asked.
 function P:Note(text, kind, extra)
-  local r = self:NewRecord(kind or "SYSTEM", "PARLEY")
+  local r = self:NewRecord(kind or "SYSTEM", "SCRIVENER")
   r.text = text
   r.note = true
   if extra then for k, v in pairs(extra) do r[k] = v end end
@@ -110,7 +110,7 @@ local function joinPeople(r)
 end
 
 -------------------------------------------------------------------------------------------
--- Plain lines: everything Parley does with chat runs here
+-- Plain lines: everything Scrivener does with chat runs here
 -------------------------------------------------------------------------------------------
 
 ---Mentions, alerts and folding on a plain record, then show and save it. Returns false when it folded.
@@ -318,7 +318,7 @@ P:OnReady(function()
   if not P.db.takeover then return end
   for ctype in pairs(P.KIND_OF) do
     local event = "CHAT_MSG_" .. ctype
-    Core:On(event, "parley.lines", function(ev, ...)
+    Core:On(event, "scrivener.lines", function(ev, ...)
       local ok, err = pcall(route, ev, ...)
       if not ok then
         P.diag.errors = P.diag.errors + 1
@@ -326,8 +326,8 @@ P:OnReady(function()
       end
     end)
   end
-  Core:Listen("NORGANNON_RESTRICTIONS_CHANGED", "parley.lines", restrictionsChanged)
+  Core:Listen("NORGANNON_RESTRICTIONS_CHANGED", "scrivener.lines", restrictionsChanged)
   for _, event in ipairs({ "ENCOUNTER_END", "PLAYER_REGEN_ENABLED", "ZONE_CHANGED_NEW_AREA" }) do
-    Core:On(event, "parley.catchup", function() C_Timer.After(1, restrictionsChanged) end)
+    Core:On(event, "scrivener.catchup", function() C_Timer.After(1, restrictionsChanged) end)
   end
 end)

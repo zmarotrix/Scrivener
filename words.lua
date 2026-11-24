@@ -1,10 +1,10 @@
--- Parley's player-facing words, all in one place. Brief and factual (brand/BRAND.md), no exclamation marks.
+-- Scrivener's player-facing words, all in one place. Brief and factual (brand/BRAND.md), no exclamation marks.
 -- Chat names come from the game's own strings where it has them, so they follow the player's language.
 
-Parley = Parley or {}
+Scrivener = Scrivener or {}
 
-Parley.L = {
-  needsCore = "Parley needs Norgannon Core 1.35 or newer; it is turned off.",
+Scrivener.L = {
+  needsCore = "Scrivener needs Norgannon Core 1.35 or newer; it is turned off.",
   role = "Chat",
 
   -- the kinds of chat a tab can mix (fallbacks when the game has no string of its own)
@@ -198,20 +198,20 @@ Parley.L = {
     names = "rename channels (LookingForGroup as LFG, say)",
     find = "search chat and history",
     off = "go back to the game's own chat (reloads)",
-    on = "use Parley's chat windows (reloads)",
-    check = "what Parley has seen of this client so far",
+    on = "use Scrivener's chat windows (reloads)",
+    check = "what Scrivener has seen of this client so far",
     reset = "put the windows back to the chosen layout",
   },
   alertAdded = "Alert added: %s.",
-  alertNeedsWords = "Give the alert some words or an item: /parley alert arcanite bar",
-  findNeedsWords = "What should Parley look for? /parley find words",
-  turnedOff = "Parley is off. The game's own chat is back. /parley on brings Parley back.",
+  alertNeedsWords = "Give the alert some words or an item: /scrivener alert arcanite bar",
+  findNeedsWords = "What should Scrivener look for? /scrivener find words",
+  turnedOff = "Scrivener is off. The game's own chat is back. /scrivener on brings Scrivener back.",
   layoutUnknown = "Layouts: one, sides, social, group, trader.",
   locked = "Windows locked.",
   unlocked = "Windows unlocked: drag a window by its tab bar, resize it from the corner.",
-  otherChat = "%s is also loaded. Two chat add-ons fight over the chat box; turn one off (/parley off turns Parley off).",
-  boxFailed = "Parley couldn't move the chat box, so the game's chat windows stay as they were.",
-  commandTaken = "/%s is already used by the game or another add-on, so Parley leaves it alone.",
+  otherChat = "%s is also loaded. Two chat add-ons fight over the chat box; turn one off (/scrivener off turns Scrivener off).",
+  boxFailed = "Scrivener couldn't move the chat box, so the game's chat windows stay as they were.",
+  commandTaken = "/%s is already used by the game or another add-on, so Scrivener leaves it alone.",
 
   -- the Channel names and Alerts panels
   namesTitle = "Channel names",
@@ -240,7 +240,7 @@ Parley.L = {
   -- settings
   set = {
     windows = "Windows",
-    takeover = "Parley's chat windows",
+    takeover = "Scrivener's chat windows",
     takeoverDesc = "Off gives you the game's own chat back. Changing it reloads the interface.",
     font = "Text size",
     fontFace = "Font",
@@ -315,10 +315,10 @@ Parley.L = {
     resetWindows = "Reset windows",
   },
 
-  -- /parley check
+  -- /scrivener check
   check = {
-    title = "What Parley has seen this session:",
-    box = "Chat box moved into Parley: %s",
+    title = "What Scrivener has seen this session:",
+    box = "Chat box moved into Scrivener: %s",
     lines = "Lines shown: %d",
     held = "Lines that came in hidden: %d (shown as they arrived: %d, refused: %d)",
     reread = "Hidden lines read again after the fight: %d (still hidden: %d, gone: %d)",

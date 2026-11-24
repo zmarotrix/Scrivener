@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0 (2026-11-24)
+
+- **Parley is now Scrivener.** Same add-on, new name. `/scrivener` opens it, and `/parley` still works. The folder and the saved
+  data have the new name too, so the game sees a new add-on: remove the old Parley folder, or two chat add-ons run at once. Settings and history saved by Parley aren't carried over on their own.
+
+Up to 0.8.2 it was called Parley.
+
 ## 0.8.2 (2026-11-23)
 
 - First public release. The examples in Settings use a made-up name.

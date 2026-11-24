@@ -1,8 +1,8 @@
 -- Pick a layout, as the mock-up's first-run screen drew it: the screen dims, one question, and a card per layout with
 -- a small picture of where its windows go (drawn from the layouts themselves, so the pictures can't drift from what
--- Pick applies). Click a card, then "Use" it. The first time, "Keep the game's chat for now" turns Parley off.
+-- Pick applies). Click a card, then "Use" it. The first time, "Keep the game's chat for now" turns Scrivener off.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI
@@ -79,7 +79,7 @@ local function choose(key)
 end
 
 local function build()
-  dim = CreateFrame("Frame", "ParleyLayoutDim", UIParent)
+  dim = CreateFrame("Frame", "ScrivenerLayoutDim", UIParent)
   dim:SetAllPoints(UIParent)
   dim:SetFrameStrata("FULLSCREEN_DIALOG")
   dim:EnableMouse(true)
@@ -88,7 +88,7 @@ local function build()
   dim.tex:SetColorTexture(0, 0, 0, .6)
   dim:Hide()
 
-  modal = CreateFrame("Frame", "ParleyLayoutPicker", dim)
+  modal = CreateFrame("Frame", "ScrivenerLayoutPicker", dim)
   modal:SetWidth(W)
   modal:SetPoint("CENTER", 0, 40)
   modal:SetFrameLevel(dim:GetFrameLevel() + 5)
@@ -154,7 +154,7 @@ local function build()
   modal.hint:SetPoint("BOTTOMLEFT", PAD, 26)
   modal.hint:SetText(L.layoutLater)
   modal:SetHeight(76 + cardH + 18 + 28 + 18)
-  tinsert(UISpecialFrames, "ParleyLayoutDim")
+  tinsert(UISpecialFrames, "ScrivenerLayoutDim")
 end
 
 function P:ShowLayoutPicker()

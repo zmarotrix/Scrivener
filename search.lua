@@ -3,7 +3,7 @@
 -- the words you searched for marked. Pick a result to jump to it in its tab. It searches this session and everything
 -- history kept, as you type. Ctrl-F in the chat box opens it too; Esc closes it.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI

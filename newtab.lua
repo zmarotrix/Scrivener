@@ -2,7 +2,7 @@
 -- then "Your own mix" as a chip for every chat and channel, "Only lines that mention me", Tab or New window, and
 -- Cancel / Add tab. Shift-clicking a card opens it as a window. It opens above the + on the tab bar.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI
@@ -47,13 +47,13 @@ local function card(parent, key, onClick)
 end
 
 local function build()
-  pop = CreateFrame("Frame", "ParleyNewTab", UIParent)
+  pop = CreateFrame("Frame", "ScrivenerNewTab", UIParent)
   pop:SetFrameStrata("DIALOG")
   pop:SetWidth(W)
   pop:EnableMouse(true)
   pop:SetClampedToScreen(true)
   P.Panel(pop)
-  tinsert(UISpecialFrames, "ParleyNewTab")
+  tinsert(UISpecialFrames, "ScrivenerNewTab")
   P.PanelTitle(pop, L.newTab, 18, PAD, -11, TOP - 12)
   pop.close = UI.CloseButton(pop, function() pop:Hide() end)
   pop.close:SetPoint("TOPRIGHT", -9, -9)

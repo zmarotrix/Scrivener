@@ -5,7 +5,7 @@
 -- Their whispers are whispers: the same Whispers tab, conversations, notes and history as a character's, with the name
 -- in the game's Battle.net blue.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local Hidden = P.Hidden
@@ -264,6 +264,6 @@ end
 P:OnReady(function()
   if not P.db.takeover then return end
   for _, event in ipairs({ "BN_FRIEND_LIST_SIZE_CHANGED", "BN_CONNECTED" }) do
-    P.Core:On(event, "parley.bnet", function() byTag = nil end)
+    P.Core:On(event, "scrivener.bnet", function() byTag = nil end)
   end
 end)

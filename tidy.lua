@@ -4,7 +4,7 @@
 -- Every pattern is made from the game's own message string (LOOT_ITEM, LOOT_ROLL_ROLLED_NEED...), so it matches what the
 -- client prints, in its language. A line no pattern matches stays as the game wrote it.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local Core = P.Core
@@ -91,7 +91,7 @@ local function sensible(f, a)
   if a.who and (a.who == "" or a.who:find("|H", 1, true) or a.who:find("^[%d,]+$")) then return false end
   if a.item and a.item:find("^[%d,]+$") then return false end
   if ROLL_WHAT[f.what] and not (a.item and a.item:find("|H", 1, true)) then return false end   -- rolls are always on links
-  -- "up for rolls" is the link and then only the item: anything more is a roll line Parley doesn't know
+  -- "up for rolls" is the link and then only the item: anything more is a roll line Scrivener doesn't know
   if f.what == "started" and not (a.item:find("^|c[^|]*|H[^|]*|h%[[^%]]*%]|h|r$") or a.item:find("^|H[^|]*|h%[[^%]]*%]|h$")) then
     return false
   end
@@ -259,7 +259,7 @@ function P.Money(copper)
 end
 
 -- the game's own icons where it has one players know: the backpack, the gold coin, the roll frame's dice, coin, shard
--- and cross; Parley's drawn ones for the rest
+-- and cross; Scrivener's drawn ones for the rest
 local GAME_ICON = {
   bag = "Interface\\Buttons\\Button-Backpack-Up", coin = "Interface\\MoneyFrame\\UI-GoldIcon",
   dice = "Interface\\Buttons\\UI-GroupLoot-Dice-Up", greed = "Interface\\Buttons\\UI-GroupLoot-Coin-Up",
@@ -273,7 +273,7 @@ local function icon(name)
   return P.Explained(name, "|T" .. path .. ":" .. h .. ":" .. h .. ":0:" .. P.IconDrop() .. "|t") .. " "
 end
 
--- a person's name as the rest of Parley shows it, in class colour when the game knows their class
+-- a person's name as the rest of Scrivener shows it, in class colour when the game knows their class
 local function person(who, me)
   if not me and who and P.BNPerson then
     local friend = P.BNPerson(who)   -- a Battle.net friend's token: their link and the character they're on
@@ -355,7 +355,7 @@ end
 
 -------------------------------------------------------------------------------------------
 -- People nearby: the game tells you what everyone near you crafts and opens (herbs, ore, chests, locks). In a city
--- that's a flood of strangers, so Parley shows only yours and your group's unless Settings asks for everyone's.
+-- that's a flood of strangers, so Scrivener shows only yours and your group's unless Settings asks for everyone's.
 -------------------------------------------------------------------------------------------
 
 local NEARBY = { craft = true, open = true }
@@ -378,8 +378,8 @@ local function inGroup(who)
   return false
 end
 
----Whether a line is a stranger crafting or opening something near you, which Parley leaves out (Settings, Crafting by
----people nearby). A line Parley can't read for who it was is never left out.
+---Whether a line is a stranger crafting or opening something near you, which Scrivener leaves out (Settings, Crafting by
+---people nearby). A line Scrivener can't read for who it was is never left out.
 function P.Nearby(r)
   local t = r.tidy
   if not (t and NEARBY[t.what]) or t.me or P.db.craftNearby then return false end
@@ -388,7 +388,7 @@ end
 
 local CHOICE_ICON = { need = "dice", greed = "greed", de = "de", pass = "pass" }
 
--- The game names a crafted item without linking it ("Elowen creates Minor Healing Potion."); Parley links it when the
+-- The game names a crafted item without linking it ("Elowen creates Minor Healing Potion."); Scrivener links it when the
 -- client knows the item by that name, so it can be clicked like any other.
 local linked = {}
 local function linkItem(text)
@@ -471,5 +471,5 @@ end
 
 function P.UnfoldLink(t, id)
   if not (t.names and #t.names > 3 and not t.open and id) then return "" end
-  return " |cff" .. P.ACCENT_HEX .. "|Haddon:Parley:unfold:" .. id .. "|h" .. L.tidy.show .. "|h|r"
+  return " |cff" .. P.ACCENT_HEX .. "|Haddon:Scrivener:unfold:" .. id .. "|h" .. L.tidy.show .. "|h|r"
 end

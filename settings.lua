@@ -1,6 +1,6 @@
--- Parley's page in the game's settings, under Norgannon.
+-- Scrivener's page in the game's settings, under Norgannon.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local S = L.set

@@ -1,10 +1,10 @@
 -- Taking over from the game's chat windows, gently.
 -- Blizzard's chat windows are parented to a hidden frame, not moved or rewritten: they keep running underneath (reply
--- targets for /r, whisper sounds, censorship prompts, GM chat). Blizzard's chat box moves into Parley's window and is
--- restyled with widget calls only; Parley never writes its fields or replaces its scripts, so /cast, /target and the
+-- targets for /r, whisper sounds, censorship prompts, GM chat). Blizzard's chat box moves into Scrivener's window and is
+-- restyled with widget calls only; Scrivener never writes its fields or replaces its scripts, so /cast, /target and the
 -- other protected commands typed into it keep working. If the box can't move, nothing else changes.
 
-local P = Parley
+local P = Scrivener
 if not P or P.disabled then return end
 local L = P.L
 local UI = P.UI
@@ -12,7 +12,7 @@ local C = UI.C
 local Core = P.Core
 local Hidden = P.Hidden
 
-local vault = CreateFrame("Frame", "ParleyVault", UIParent)
+local vault = CreateFrame("Frame", "ScrivenerVault", UIParent)
 vault:Hide()
 
 local HIDE = { "GeneralDockManager", "ChatFrameMenuButton", "ChatFrameChannelButton", "ChatFrameToggleVoiceDeafenButton",
@@ -26,14 +26,14 @@ local ART = { "Left", "Mid", "Right", "FocusLeft", "FocusMid", "FocusRight" }
 -- in its room; clicking the chip lists where else the line could go.
 -------------------------------------------------------------------------------------------
 
-local home = CreateFrame("Button", "ParleyChatBoxHome", UIParent)
+local home = CreateFrame("Button", "ScrivenerChatBoxHome", UIParent)
 home:SetHeight(P.COMPOSE_H)
 home:RegisterForClicks("LeftButtonUp")
 P.FieldLook(home)   -- recessed; it glows while you type
 local idle = UI.Text(home, "body", 13, C.faint)
 
 -- The chip and the box sit side by side, never one over the other: while you type, the game lifts its box to the
--- dialog layer, above Parley's windows, and a chip under the box's edge never got the click (0.6.0's fix).
+-- dialog layer, above Scrivener's windows, and a chip under the box's edge never got the click (0.6.0's fix).
 local chip = CreateFrame("Button", nil, home)
 chip:SetHeight(22)
 chip:EnableMouse(true)
@@ -51,7 +51,7 @@ idle:SetText(L.composeIdle)
 
 -- The right end: the letter count, then the pill for the game's chat menu (emotes, voice emotes, languages), as the
 -- game's chat window has it. For a character who speaks more than one language the pill names the one the box speaks;
--- otherwise it shows the game's own chat menu icon. The pill is drawn by Parley; the game's own chat menu button sits on
+-- otherwise it shows the game's own chat menu icon. The pill is drawn by Scrivener; the game's own chat menu button sits on
 -- it, see-through, and takes the click. Its menu is the game's, so picking a language there is the game's doing: an
 -- add-on that set the language itself would leave the chat box marked as touched by an add-on, and /cast typed into it
 -- could fail in combat.
@@ -196,7 +196,7 @@ local function placeMenuButton()
   return true
 end
 
----The game's chat menu icon, read from its own button (Parley's pill shows it when there's no language to name).
+---The game's chat menu icon, read from its own button (Scrivener's pill shows it when there's no language to name).
 local function copyMenuIcon(btn)
   if lang.iconSet then return true end
   local tex = btn.GetNormalTexture and btn:GetNormalTexture()
@@ -450,7 +450,7 @@ function P:DockBox(win)
   local old = self.dockWin
   self.dockWin = win
   if old and old ~= win and old.data and self.windows[old.index] == old then self:UpdateTabs(old) end
-  self:UpdateTabs(win)   -- Parley's mark goes with the chat box
+  self:UpdateTabs(win)   -- Scrivener's mark goes with the chat box
   home:SetParent(win.frame)
   home:ClearAllPoints()
   home:SetPoint("BOTTOMLEFT", win.frame, "BOTTOMLEFT", 8, 8)
@@ -467,7 +467,7 @@ end
 -- The game's chat windows, out of sight
 -------------------------------------------------------------------------------------------
 
--- Some of the game's chat frames have a place in Parley instead of the vault: the combat log in a Combat log pane
+-- Some of the game's chat frames have a place in Scrivener instead of the vault: the combat log in a Combat log pane
 -- (combatlog.lua), the alerts above the window with the chat box. P.hosts[name] places one and returns true, or false
 -- when it has nowhere to go.
 P.hosts = P.hosts or {}
@@ -519,7 +519,7 @@ local flushing = false
 local lastPrint, lastPrintT
 
 -- The game's chat windows also print lines of their own, from no chat event: the guild's message of the day, level-ups,
--- /played, Battle.net and chat server disconnects, chats Parley doesn't route itself. Each comes with its chat type's
+-- /played, Battle.net and chat server disconnects, chats Scrivener doesn't route itself. Each comes with its chat type's
 -- id, so it goes to that chat (guild, system, a channel), not to the Add-ons tab.
 local typeOfId = {}   -- [ChatTypeInfo id] = chat type ("GUILD", "CHANNEL5"), or false when no chat type has it
 
@@ -582,7 +582,7 @@ end
 
 local function onAddMessage(_, text, r, g, b, id)
   if id ~= nil and not Hidden(id) and type(id) == "number" then
-    -- a line the game made from a chat event: Parley shows that event itself
+    -- a line the game made from a chat event: Scrivener shows that event itself
     local now = GetTime()
     if P.sawType[id] == now then return end
     -- a friend coming online: the game writes its line a moment later, once it has the game's icon
@@ -605,7 +605,7 @@ local function hookPrints()
   end
 end
 
--- lines printed while the game was loading, before Parley was there to see them
+-- lines printed while the game was loading, before Scrivener was there to see them
 local function copyEarlier()
   local f = DEFAULT_CHAT_FRAME
   if not (f and f.GetNumMessages and f.GetMessageInfo) then return end
@@ -638,7 +638,7 @@ local function notFound(_, text)
   local full = Core.Names:Address(name)
   if not full or full == name then return end
   resends[#resends + 1] = { to = full, text = lastTold[name:lower()] }
-  local link = "|cff" .. P.ACCENT_HEX .. "|Haddon:Parley:resend:" .. #resends .. "|h[" .. L.sendAgainLink .. "]|h|r"
+  local link = "|cff" .. P.ACCENT_HEX .. "|Haddon:Scrivener:resend:" .. #resends .. "|h[" .. L.sendAgainLink .. "]|h|r"
   P:Note(L.sendAgain:format(name, full) .. " " .. link, "WHISPER", { convoKey = full:lower() })
 end
 
@@ -664,17 +664,17 @@ function P:TakeOver()
   end
   self.box = main
   self.diag.box = true
-  self:DockBox(self.dockWin or self.windows[1])   -- after the box is Parley's: docking needs it (it was a no-op before)
+  self:DockBox(self.dockWin or self.windows[1])   -- after the box is Scrivener's: docking needs it (it was a no-op before)
   sweep()
   for _, fn in ipairs({ "FCF_OpenTemporaryWindow", "FCF_OpenNewWindow", "FCF_DockUpdate", "FCF_UnDockFrame",
       "FCF_RestorePositionAndDimensions" }) do
     if type(rawget(_G, fn)) == "function" then hooksecurefunc(fn, function() C_Timer.After(0, sweep); C_Timer.After(0, hookPrints) end) end
   end
-  -- "Move to whisper window" on a name's menu: Parley's conversation with them instead of a hidden game window
+  -- "Move to whisper window" on a name's menu: Scrivener's conversation with them instead of a hidden game window
   if type(rawget(_G, "FCF_OpenTemporaryWindow")) == "function" then
     hooksecurefunc("FCF_OpenTemporaryWindow", function(chatType, target) P:MovedToWhisperWindow(chatType, target) end)
   end
-  -- the game's chat keys scroll Parley's pane (they'd scroll the game's hidden window)
+  -- the game's chat keys scroll Scrivener's pane (they'd scroll the game's hidden window)
   local util = rawget(_G, "ChatFrameUtil")
   for fn, how in pairs({ ChatPageUp = "PageUp", ChatPageDown = "PageDown", ScrollToBottom = "ScrollToBottom" }) do
     if util and type(util[fn]) == "function" then hooksecurefunc(util, fn, function() P:ScrollShown(how) end) end
@@ -691,8 +691,8 @@ function P:TakeOver()
       P:DropPick(not text:find("^/%S"))   -- a bare slash, or words of no particular chat (a linked item)
     end)
   end
-  -- a chat's colour changed (Parley's Channel names panel or the game's settings): the lines follow
-  Core:On("UPDATE_CHAT_COLOR", "parley.colors", function()
+  -- a chat's colour changed (Scrivener's Channel names panel or the game's settings): the lines follow
+  Core:On("UPDATE_CHAT_COLOR", "scrivener.colors", function()
     C_Timer.After(0, function() P:RedrawAll(); if P.RefreshNames then P:RefreshNames() end end)
   end)
   -- Edit Mode owns the game's chat window position; put it back out of sight when Edit Mode closes
@@ -717,7 +717,7 @@ P:OnReady(function()
   if SendChatMessage and SendChatMessage ~= (C_ChatInfo and C_ChatInfo.SendChatMessage) then
     hooksecurefunc("SendChatMessage", remember)
   end
-  Core:On("CHAT_MSG_SYSTEM", "parley.resend", notFound)
+  Core:On("CHAT_MSG_SYSTEM", "scrivener.resend", notFound)
   Core:OnLogin(function()
     P.Safe(hookPrints)
     P.Safe(copyEarlier)

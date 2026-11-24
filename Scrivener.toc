@@ -1,0 +1,36 @@
+## Interface: 16001
+## Title: |cff9aa6ffScrivener|r
+## Category: NorgannonDB
+## Notes: Chat, rebuilt for WoW Forever: windows you arrange in seconds, short lines, alerts for what you care about, and every line kept through dungeon fights. Powered by NorgannonDB. /scrivener
+## Author: Maro
+## Version: 0.9.0
+## X-License: All Rights Reserved
+## Dependencies: NorgannonDB_Core
+## SavedVariables: ScrivenerDB
+## SavedVariablesPerCharacter: ScrivenerCharDB
+## IconTexture: Interface\AddOns\Scrivener\media\scrivener
+## AddonCompartmentFunc: Scrivener_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: Scrivener_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: Scrivener_OnAddonCompartmentLeave
+
+words.lua
+core.lua
+look.lua
+kinds.lua
+bnet.lua
+format.lua
+tidy.lua
+lines.lua
+window.lua
+arrange.lua
+board.lua
+convos.lua
+newtab.lua
+takeover.lua
+combatlog.lua
+alerts.lua
+history.lua
+search.lua
+editors.lua
+picker.lua
+settings.lua
