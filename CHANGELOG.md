@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.2 (2026-11-23)
+
+- First public release. The examples in Settings use a made-up name.
+
 ## 0.8.1 (2026-11-23)
 
 - **Chat history is shared between your characters**, with a switch in Settings, under History. Shared, every character

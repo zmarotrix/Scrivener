@@ -1,12 +1,12 @@
 <p align="center">
   <img src="https://img.shields.io/badge/WoW%20Forever-1.60.1-e7c66c?style=flat-square" alt="WoW Forever 1.60.1">
-  <img src="https://img.shields.io/badge/status-not%20yet%20played%20in%20game-9aa6ff?style=flat-square" alt="Status: not yet played in game">
+  <img src="https://img.shields.io/badge/status-beta-9aa6ff?style=flat-square" alt="Status: beta">
   <img src="https://img.shields.io/badge/part%20of-NorgannonDB%20suite-2b2333?style=flat-square" alt="Part of the NorgannonDB suite">
 </p>
 
 > [!WARNING]
-> **Very much a work in progress.** This first build has passed its test harness but hasn't been played in the game.
-> If chat misbehaves, `/parley off` gives you the game's own chat back.
+> **Parley is in beta.** Expect bugs and changes between versions. If chat misbehaves, `/parley off` gives you the game's
+> own chat back.
 
 **Parley is chat, rebuilt for WoW Forever.** Windows you arrange in seconds, short lines you read at a glance, alerts
 for the lines that matter to you, and chat that keeps working in dungeon fights.
@@ -21,9 +21,9 @@ it, or onto empty screen for a new window. Arrange windows outlines them all; mo
 edges and to the other windows.
 
 ### Short lines
-`12:41  Kuma Tyrant: Anyone up for BRD?` The chat is a coloured bar at the start of the line. Tabs that mix chats add
+`12:41  Elowen Brightwater: Anyone up for BRD?` The chat is a coloured bar at the start of the line. Tabs that mix chats add
 the chat's name, or a short one you choose: LookingForGroup as `LFG`, Global as `Glo`. Each short name is also a
-command: `/glo hello`. Names are in class colour, and can be shown in full, as `Kuma T.` or as the first name only.
+command: `/glo hello`. Names are in class colour, and can be shown in full, as `Elowen B.` or as the first name only.
 The same line from the same person within five minutes becomes one line with a count, and people coming online share
 a line. Loot, money, rolls, experience and reputation read in one short shape with the game's own icons. Strangers
 crafting and gathering near you stay out (a city is full of them); yours and your group's show.

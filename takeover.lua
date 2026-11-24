@@ -618,7 +618,7 @@ local function copyEarlier()
 end
 
 -------------------------------------------------------------------------------------------
--- "No player named Kuma": offer the full name, one click to try again
+-- "No player named Elowen": offer the full name, one click to try again
 -------------------------------------------------------------------------------------------
 
 local lastTold = {}     -- [lower-case target] = the last whisper text sent to them

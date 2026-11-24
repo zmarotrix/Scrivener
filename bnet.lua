@@ -135,7 +135,7 @@ end
 -- [token] = account id, for the names in "came online" lines
 local people = {}
 
----A friend's name in a tidy line: the link, then the character they're on, faintly ("Maro (Kuma Tyrant)").
+---A friend's name in a tidy line: the link, then the character they're on, faintly ("Maro (Elowen Brightwater)").
 function P.BNPerson(token)
   local id = people[token]
   if not id then return nil end

@@ -160,7 +160,7 @@ end
 P.ClassHex = colorFor
 
 local FIRST_CHAR = "^[%z\1-\127\194-\244][\128-\191]*"
----A full name as the player chose to see it: Kuma Tyrant, Kuma T. or Kuma.
+---A full name as the player chose to see it: Elowen Brightwater, Elowen B. or Elowen.
 function P.ShowName(full)
   full = P.Core.Names.Full(full) or full or ""
   local mode = P.db.surnames

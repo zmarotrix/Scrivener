@@ -3,7 +3,7 @@
 ## Category: NorgannonDB
 ## Notes: Chat, rebuilt for WoW Forever: windows you arrange in seconds, short lines, alerts for what you care about, and every line kept through dungeon fights. Powered by NorgannonDB. /parley
 ## Author: Maro
-## Version: 0.8.1
+## Version: 0.8.2
 ## X-License: All Rights Reserved
 ## Dependencies: NorgannonDB_Core
 ## SavedVariables: ParleyDB

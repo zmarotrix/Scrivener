@@ -21,7 +21,7 @@ Parley = Parley or {}
 local P = Parley
 local L = P.L
 
-P.VERSION = "0.8.1"
+P.VERSION = "0.8.2"
 P.Core = Core
 P.UI = Core.UI
 P.MEDIA = "Interface\\AddOns\\Parley\\media\\"
@@ -68,7 +68,7 @@ P.DEFAULTS = {
   histories = {},         -- [character's GUID] = { name, history, people, personInfo }: what the others show
   keepAll = true,         -- history keeps public channels, Say, loot and system lines too (two days, 400 of each)
   time = true,
-  surnames = "full",      -- "full", "short" (Kuma T.) or "first"
+  surnames = "full",      -- "full", "short" (Elowen B.) or "first"
   showAs = "short",       -- "short", "number", "full" or "bar"
   fold = true,
   short = {},             -- [kind key] = the short name the player chose

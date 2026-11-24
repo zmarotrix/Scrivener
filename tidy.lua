@@ -1,5 +1,5 @@
 -- Tidy lines: money, loot, rolls, experience, reputation, skills and people coming online, all in one short shape:
--- an icon, who, then what. "Kuma Tyrant: 12g 40s", "Kuma Tyrant: [Arcanite Bar] | Need 87". The highest roll on an item
+-- an icon, who, then what. "Elowen Brightwater: 12g 40s", "Elowen Brightwater: [Arcanite Bar] | Need 87". The highest roll on an item
 -- shows green and the rest grey; when someone rolls higher, the old leader's line turns grey in place.
 -- Every pattern is made from the game's own message string (LOOT_ITEM, LOOT_ROLL_ROLLED_NEED...), so it matches what the
 -- client prints, in its language. A line no pattern matches stays as the game wrote it.
@@ -388,7 +388,7 @@ end
 
 local CHOICE_ICON = { need = "dice", greed = "greed", de = "de", pass = "pass" }
 
--- The game names a crafted item without linking it ("Kuma creates Minor Healing Potion."); Parley links it when the
+-- The game names a crafted item without linking it ("Elowen creates Minor Healing Potion."); Parley links it when the
 -- client knows the item by that name, so it can be clicked like any other.
 local linked = {}
 local function linkItem(text)
