@@ -1,0 +1,35 @@
+## Interface: 16001
+## Title: |cff9aa6ffParley|r
+## Category: NorgannonDB
+## Notes: Chat, rebuilt for WoW Forever: windows you arrange in seconds, short lines, alerts for what you care about, and every line kept through dungeon fights. Powered by NorgannonDB. /parley
+## Author: Maro
+## Version: 0.7.11
+## X-License: All Rights Reserved
+## Dependencies: NorgannonDB_Core
+## SavedVariables: ParleyDB
+## SavedVariablesPerCharacter: ParleyCharDB
+## IconTexture: Interface\AddOns\Parley\media\parley
+## AddonCompartmentFunc: Parley_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: Parley_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: Parley_OnAddonCompartmentLeave
+
+words.lua
+core.lua
+kinds.lua
+bnet.lua
+format.lua
+tidy.lua
+lines.lua
+window.lua
+arrange.lua
+board.lua
+convos.lua
+newtab.lua
+takeover.lua
+combatlog.lua
+alerts.lua
+history.lua
+search.lua
+editors.lua
+picker.lua
+settings.lua
